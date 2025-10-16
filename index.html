@@ -343,10 +343,11 @@
     </div>
 
     <script>
-        // --- KONFIGURASI URL ANDA (HARAP GANTI DENGAN URL APPS SCRIPT ANDA) ---
+        // --- KONFIGURASI URL ANDA (Telah diganti) ---
         const MEMBER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzwa_Tf1b5kqi3WHonPL8m0UBGxjCYDiOw6-nDS5an639X1QtmzV4vvuCeDwZ7ERdQX/exec';
         const TRANSACTION_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwClEfSUy_28FKeEuu9VXht-BK_R7syaMZVsl50Q-wNEl-z5ElGqN6NnVr_vmnY4935/exec';
 
+        // --- KONFIGURASI ADMIN ---
         const ADMIN_USERNAME = 'martabak'; 
         const ADMIN_PASSWORD = '189189';
         const AUTH_KEY = 'martabak_auth';
@@ -413,7 +414,6 @@
             }
 
             try {
-                // Member Login (Menggunakan Apps Script Member doPost action: memberLogin)
                 const response = await fetch(MEMBER_SHEET_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -464,7 +464,6 @@
             localStorage.removeItem(AUTH_KEY);
             currentUser = null;
             checkSession();
-            // Clear inputs
             document.getElementById('member-login-identifier').value = '';
             document.getElementById('member-login-password').value = '';
             document.getElementById('admin-username').value = '';
@@ -478,7 +477,6 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
-            // Highlight active button in main nav
             document.querySelectorAll('#main-nav-buttons .nav-btn').forEach(b => b.classList.remove('active'));
             const clickedBtn = Array.from(document.querySelectorAll('#main-nav-buttons .nav-btn')).find(btn => btn.textContent.toLowerCase().includes(pageId.replace('-', ' ').split(' ')[0]));
             if(clickedBtn) clickedBtn.classList.add('active');
@@ -594,11 +592,11 @@
         
         async function loadMembers() {
             try {
-                // Fetch data dari Apps Script Member
                 const response = await fetch(MEMBER_SHEET_URL);
                 membersData = await response.json();
 
-                // Update total stats
+                if (membersData.error) throw new Error(membersData.error);
+
                 document.getElementById('totalMembers').textContent = membersData.length;
 
                 membersData.sort((a, b) => (parseInt(b.totalPoin) || 0) - (parseInt(a.totalPoin) || 0));
@@ -631,6 +629,7 @@
                 });
             } catch (error) {
                 console.error('Error loading members:', error);
+                document.getElementById('memberTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data member. Cek Apps Script.</td></tr>`;
             }
         }
         
@@ -709,10 +708,10 @@
             document.getElementById('manual-select-container').classList.add('hidden');
             document.getElementById('scanner-container').classList.add('hidden');
             
-            // Reset form dan update tampilan
             document.getElementById('transactionType').value = 'PEMBELIAN_POIN';
             document.getElementById('jumlahItem').value = '1';
             document.getElementById('totalHarga').value = '';
+            document.getElementById('manualPoinValue').value = '';
             updateTransactionForm();
         }
 
@@ -753,14 +752,14 @@
                     return; 
                 }
                 poinChange = jumlahItem * 5;
-                produk = 'Martabak';
+                produk = 'Pembelian Martabak';
             } else if (transactionType === 'TUKAR_POIN') {
                 poinChange = -250;
-                produk = 'Tukar Martabak Gratis';
+                produk = 'Tukar Martabak Gratis (250 Poin)';
                 jumlahItem = 1;
             } else if (transactionType === 'MANUAL_TAMBAH' || transactionType === 'MANUAL_KURANG') {
                 poinChange = parseInt(document.getElementById('manualPoinValue').value) || 0;
-                produk = (poinChange > 0) ? 'Manual Tambah Poin' : 'Manual Kurang Poin';
+                produk = (poinChange > 0) ? `Manual Tambah Poin (${poinChange})` : `Manual Kurang Poin (${poinChange})`;
                 jumlahItem = 1;
                 if (poinChange === 0) {
                      alert('Masukkan nilai poin yang valid untuk transaksi manual.'); 
@@ -795,7 +794,7 @@
                 totalHarga: totalHarga,
                 poinDidapat: poinChange,
                 totalPoinSekarang: totalPoinBaru, 
-                tipeTransaksi: transactionType,
+                tipeTransaksi: transactionType.replace('_', ' '),
                 action: 'addTransaction' 
             };
             
@@ -813,7 +812,7 @@
                 const updatePoinResult = await updatePoinRes.json();
                 
                 if (updatePoinResult.status !== 'success') {
-                    throw new Error('Gagal update poin member. Cek Apps Script Member.');
+                    throw new Error('Gagal update poin member. Cek Apps Script Member. ' + (updatePoinResult.message || ''));
                 }
 
             } catch (error) {
@@ -832,7 +831,7 @@
                     body: JSON.stringify(transactionData)
                 });
                 
-                alert(`✅ Transaksi ${transactionType.replace('_', ' ')} Berhasil!\n\n` +
+                alert(`✅ Transaksi ${transactionData.tipeTransaksi} Berhasil!\n\n` +
                       `Poin: ${poinChange > 0 ? '+' : ''}${poinChange}\n` +
                       `Total poin sekarang: ${totalPoinBaru}`);
 
@@ -857,11 +856,15 @@
                 const response = await fetch(TRANSACTION_SHEET_URL);
                 transactionsData = await response.json();
 
+                if (transactionsData.error) throw new Error(transactionsData.error);
+
+
                 document.getElementById('totalTransactions').textContent = transactionsData.length;
 
                 const tbody = document.getElementById('transactionTableBody');
                 tbody.innerHTML = '';
 
+                // Reverse untuk menampilkan transaksi terbaru di atas
                 transactionsData.reverse().forEach(trx => {
                     const poinVal = parseInt(trx.poinDidapat) || 0;
                     const totalHarga = parseInt(trx.totalHarga) || 0;
@@ -876,13 +879,14 @@
                         <td>${trx.produk || '-'}</td>
                         <td>${trx.jumlahItem || 0}</td>
                         <td>Rp ${totalHarga.toLocaleString('id-ID')}</td>
-                        <td><strong style="color: ${poinVal > 0 ? 'green' : 'red'};">${poinVal > 0 ? '+' : ''}${poinVal}</strong></td>
+                        <td><strong style="color: ${poinVal >= 0 ? 'green' : 'red'};">${poinVal > 0 ? '+' : ''}${poinVal}</strong></td>
                         <td>${totalPoinSekarang}</td>
-                        <td>${(trx.tipeTransaksi || '-').replace('_', ' ')}</td>
+                        <td>${trx.tipeTransaksi || '-'}</td>
                     `;
                 });
             } catch (error) {
                 console.error('Error loading transactions:', error);
+                document.getElementById('transactionTableBody').innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data transaksi. Cek Apps Script.</td></tr>`;
             }
         }
 
@@ -899,7 +903,6 @@
 
         function closeModal() {
             document.getElementById('successModal').classList.remove('active');
-            // Arahkan ke member login setelah berhasil daftar
             showPage('member-login');
         }
 
