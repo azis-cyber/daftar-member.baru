@@ -7,9 +7,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
-        /* CSS yang sudah ada */
+        /* CSS Styling */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 10vh; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
         .header { text-align: center; color: white; margin-bottom: 30px; }
         .header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
@@ -43,25 +43,21 @@
         .scanner-container { margin: 20px 0; text-align: center; }
         #reader { width: 100%; max-width: 500px; margin: 0 auto; }
         .member-info-card { background: #f0f0f0; padding: 20px; border-radius: 10px; margin: 20px 0; }
-        /* New Styles for Member Dashboard */
-        .member-dashboard-card { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
-        .member-dashboard-card h2 { font-size: 3em; margin: 10px 0; }
-        .member-dashboard-card p { font-size: 1.2em; }
         .transaction-form { background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 20px; }
-        .transaction-form .input-group { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap;}
-        .transaction-form .input-group > div { flex-grow: 1; min-width: 45%;}
         .alert { padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .hidden { display: none !important; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; text-align: center; }
         .stat-card h3 { font-size: 2.5em; margin-bottom: 10px; }
         .stat-card p { opacity: 0.9; }
-        @media (max-width: 768px) {
-            .transaction-form .input-group > div {
-                min-width: 100%;
-            }
+        .input-group { display: flex; gap: 20px; }
+        .input-group > div { flex: 1; }
+        .member-dashboard-card { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
+        .member-dashboard-card h2 { font-size: 3em; margin: 10px 0; }
+        .member-dashboard-card p { font-size: 1.2em; }
+        @media (max-width: 600px) {
+             .input-group { flex-direction: column; gap: 0; }
         }
     </style>
 </head>
@@ -105,12 +101,13 @@
         <div id="register" class="page">
             <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">Formulir Pendaftaran Member</h2>
             <form id="registerForm">
+                <p style="color: red; margin-bottom: 20px;">* Email dan Password WAJIB diisi untuk login.</p>
                 <div class="form-group">
                     <label>Nama Lengkap *</label>
                     <input type="text" id="nama" required>
                 </div>
                 <div class="form-group">
-                    <label>Email *</label>
+                    <label>Email * (Identitas Utama/Login)</label>
                     <input type="email" id="email" required>
                 </div>
                 <div class="form-group">
@@ -122,12 +119,12 @@
                     <input type="tel" id="telepon" required>
                 </div>
                 <div class="form-group">
-                    <label>Alamat Lengkap *</label>
-                    <textarea id="alamat" rows="3" required></textarea>
+                    <label>Alamat Lengkap</label>
+                    <textarea id="alamat" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Kota *</label>
-                    <input type="text" id="kota" required>
+                    <label>Kota</label>
+                    <input type="text" id="kota">
                 </div>
                 <div class="form-group">
                     <label>Kode Pos</label>
@@ -137,19 +134,35 @@
             </form>
         </div>
 
-        <div id="member-admin-login" class="page">
+        <div id="member-login" class="page">
             <div class="login-form">
-                <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">Login Admin / Member</h2>
-                <div id="login-alert" class="alert alert-error hidden"></div>
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">Login Member</h2>
+                <div id="member-login-alert" class="alert alert-error hidden"></div>
                 <div class="form-group">
-                    <label>Email (Member) / Username (Admin)</label>
-                    <input type="text" id="login-identifier" value="" required>
+                    <label>Email / Member ID</label>
+                    <input type="text" id="member-login-identifier" required>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="login-password" value="" required>
+                    <input type="password" id="member-login-password" required>
                 </div>
-                <button class="btn btn-primary" onclick="unifiedLogin()">Login</button>
+                <button class="btn btn-primary" onclick="memberLogin()">Login Member</button>
+            </div>
+        </div>
+
+        <div id="admin-login" class="page">
+            <div class="login-form">
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">Login Admin</h2>
+                <div id="admin-login-alert" class="alert alert-error hidden"></div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="admin-username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="admin-password" required>
+                </div>
+                <button class="btn btn-primary" onclick="adminLogin()">Login Admin</button>
             </div>
         </div>
 
@@ -177,7 +190,6 @@
                 <p>Poin yang dibutuhkan untuk 1 martabak gratis: **250 Poin**</p>
                 <p>Anda bisa menukar **<span id="exchangeCount">0</span>** martabak gratis!</p>
                 <p style="margin-top: 15px;">Jika Anda ingin menukar poin, silakan hubungi admin kasir kami.</p>
-                <a href="https://wa.me/628123456789" target="_blank" class="btn" style="background: #25D366; color: white; width: auto; margin-top: 15px;">Hubungi Admin (WhatsApp)</a>
             </div>
         </div>
 
@@ -188,9 +200,9 @@
             </div>
 
             <div class="nav-buttons">
-                <button class="nav-btn active" onclick="showAdminSection('members')">Daftar Member</button>
-                <button class="nav-btn" onclick="showAdminSection('scan')">Input Transaksi</button>
-                <button class="nav-btn" onclick="showAdminSection('transactions')">History Transaksi</button>
+                <button id="nav-btn-members" class="nav-btn active" onclick="showAdminSection('members')">Daftar Member</button>
+                <button id="nav-btn-scan" class="nav-btn" onclick="showAdminSection('scan')">Input Transaksi</button>
+                <button id="nav-btn-transactions" class="nav-btn" onclick="showAdminSection('transactions')">History Transaksi</button>
             </div>
 
             <div id="admin-members" class="admin-section">
@@ -224,11 +236,11 @@
             </div>
 
             <div id="admin-scan" class="admin-section hidden">
-                <h3 style="color: #667eea; margin-bottom: 20px;">Scan QR Code Member atau Cari Manual</h3>
+                <h3 style="color: #667eea; margin-bottom: 20px;">Scan QR Code Member atau Pilih Manual</h3>
                 
                 <div style="display: flex; gap: 15px; margin-bottom: 20px;">
                     <button class="btn btn-primary" style="width: auto;" onclick="startScanner()">📷 Scan QR Code</button>
-                    <button class="btn" style="width: auto; background: #28a745; color: white;" onclick="showManualSearch()">📝 Cari Manual</button>
+                    <button class="btn" style="width: auto; background: #28a745; color: white;" onclick="showManualSelect()">📝 Pilih Manual</button>
                 </div>
 
                 <div id="scanner-container" class="scanner-container hidden">
@@ -236,9 +248,11 @@
                     <button class="btn" style="background: #dc3545; color: white; margin-top: 15px;" onclick="stopScanner()">Stop Scanner</button>
                 </div>
 
-                <div id="manual-search-container" class="hidden" style="margin: 20px 0;">
-                    <input type="text" id="memberSearchInput" placeholder="Masukkan Member ID, Nama, Email, atau Telepon" class="form-group" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px;">
-                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="searchAndShowMember()">Cari Member</button>
+                <div id="manual-select-container" class="hidden" style="margin: 20px 0;">
+                    <select id="memberSelect" class="form-group" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px;">
+                        <option value="">-- Pilih Member --</option>
+                    </select>
+                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="selectMemberManual()">Pilih Member</button>
                 </div>
 
                 <div id="transaction-container" class="hidden">
@@ -252,35 +266,36 @@
                     <div class="transaction-form">
                         <h3 style="margin-bottom: 20px;">Input Transaksi Poin</h3>
                         
-                        <div class="input-group">
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label>Tipe Transaksi</label>
-                                <select id="transactionType" style="font-size: 16px;">
-                                    <option value="PEMBELIAN_POIN">Pembelian (Tambah Poin)</option>
-                                    <option value="TUKAR_POIN">Tukar Poin (Kurangi Poin)</option>
-                                    <option value="MANUAL_TAMBAH">Manual (+ Poin)</option>
-                                    <option value="MANUAL_KURANG">Manual (- Poin)</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 0;" id="manualPoinGroup">
-                                <label>Poin (+/-)</label>
-                                <input type="number" id="manualPoinValue" value="5" min="-99999" max="99999">
-                            </div>
+                        <div class="form-group">
+                            <label>Tipe Transaksi</label>
+                            <select id="transactionType" onchange="updateTransactionForm()">
+                                <option value="PEMBELIAN_POIN">Pembelian (Tambah Poin)</option>
+                                <option value="TUKAR_POIN">Tukar Poin (Kurangi 250 Poin)</option>
+                                <option value="MANUAL_TAMBAH">Manual Tambah Poin</option>
+                                <option value="MANUAL_KURANG">Manual Kurang Poin</option>
+                            </select>
                         </div>
-
-                        <div id="purchaseFormFields">
+                        
+                        <div id="purchaseFields">
                             <div class="form-group">
                                 <label>Produk</label>
                                 <input type="text" id="produk" value="Martabak" readonly>
                             </div>
-                            <div class="form-group">
-                                <label>Jumlah Item</label>
-                                <input type="number" id="jumlahItem" min="1" value="1">
+                            <div class="input-group">
+                                <div class="form-group">
+                                    <label>Jumlah Item</label>
+                                    <input type="number" id="jumlahItem" min="1" value="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Total Harga (Rp)</label>
+                                    <input type="number" id="totalHarga" min="0">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Total Harga (Rp)</label>
-                                <input type="number" id="totalHarga" min="0">
-                            </div>
+                        </div>
+
+                        <div id="manualPoinField" class="form-group hidden">
+                            <label>Poin (+/-)</label>
+                            <input type="number" id="manualPoinValue" min="-99999" max="99999">
                         </div>
 
                         <button class="btn btn-primary" onclick="submitTransaction()">💾 Simpan Transaksi</button>
@@ -297,11 +312,13 @@
                                 <th>Transaction ID</th>
                                 <th>Tanggal & Waktu</th>
                                 <th>Member ID</th>
-                                <th>Nama</th>
+                                <th>Nama Member</th>
                                 <th>Produk</th>
-                                <th>Jumlah Item</th> <th>Harga</th>
-                                <th>Poin</th>
-                                <th>Tipe</th>
+                                <th>Jumlah Item</th>
+                                <th>Total Harga</th>
+                                <th>Poin Didapat</th>
+                                <th>Total Poin Sekarang</th>
+                                <th>Tipe Transaksi</th>
                             </tr>
                         </thead>
                         <tbody id="transactionTableBody">
@@ -326,13 +343,13 @@
     </div>
 
     <script>
-        // --- KONFIGURASI URL ANDA (SUDAH DISUBSTITUSI) ---
-        const MEMBER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzwa_Tf1b5kqi3WHonPL8m0UBGxjCYDiOw6-nDS5an639X1QtmzV4vvuCeDwZ7ERdQX/exec'; 
+        // --- KONFIGURASI URL ANDA (HARAP GANTI DENGAN URL APPS SCRIPT ANDA) ---
+        const MEMBER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzwa_Tf1b5kqi3WHonPL8m0UBGxjCYDiOw6-nDS5an639X1QtmzV4vvuCeDwZ7ERdQX/exec';
         const TRANSACTION_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwClEfSUy_28FKeEuu9VXht-BK_R7syaMZVsl50Q-wNEl-z5ElGqN6NnVr_vmnY4935/exec';
 
-        const ADMIN_USERNAME = 'admin'; 
+        const ADMIN_USERNAME = 'martabak'; 
         const ADMIN_PASSWORD = '189189';
-        const AUTH_KEY = 'martabak_member_auth';
+        const AUTH_KEY = 'martabak_auth';
 
         let membersData = [];
         let transactionsData = [];
@@ -350,6 +367,7 @@
                 if (currentUser.role === 'admin') {
                     showPage('admin-dashboard');
                     loadMembers();
+                    loadTransactions(); 
                 } else if (currentUser.role === 'member') {
                     showPage('member-dashboard');
                     loadMemberDashboard(currentUser.memberId);
@@ -364,8 +382,8 @@
             navContainer.innerHTML = '';
 
             if (currentUser) {
-                const dashboardText = currentUser.role === 'admin' ? 'Dashboard Admin' : 'Dashboard Member';
                 const dashboardId = currentUser.role === 'admin' ? 'admin-dashboard' : 'member-dashboard';
+                const dashboardText = currentUser.role === 'admin' ? 'Dashboard Admin' : 'Dashboard Member';
 
                 navContainer.innerHTML = `
                     <button class="nav-btn active" onclick="showPage('${dashboardId}')">${dashboardText}</button>
@@ -376,35 +394,26 @@
                 navContainer.innerHTML = `
                     <button class="nav-btn active" onclick="showPage('home')">Beranda</button>
                     <button class="nav-btn" onclick="showPage('register')">Daftar Member</button>
-                    <button class="nav-btn" onclick="showPage('member-admin-login')">Login</button>
+                    <button class="nav-btn" onclick="showPage('member-login')">Member Login</button>
+                    <button class="nav-btn" onclick="showPage('admin-login')">Admin Login</button>
                 `;
             }
         }
         
-        async function unifiedLogin() {
-            const identifier = document.getElementById('login-identifier').value.trim();
-            const password = document.getElementById('login-password').value;
-            const alertElement = document.getElementById('login-alert');
+        async function memberLogin() {
+            const identifier = document.getElementById('member-login-identifier').value.trim();
+            const password = document.getElementById('member-login-password').value;
+            const alertElement = document.getElementById('member-login-alert');
             alertElement.classList.add('hidden');
 
             if (!identifier || !password) {
-                alertElement.textContent = 'Masukkan Email/Username dan Password.';
+                alertElement.textContent = 'Masukkan Email/ID Member dan Password.';
                 alertElement.classList.remove('hidden');
                 return;
             }
 
-            // 1. Coba Login Admin
-            if (identifier === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-                currentUser = { role: 'admin', username: ADMIN_USERNAME };
-                localStorage.setItem(AUTH_KEY, JSON.stringify(currentUser));
-                checkSession();
-                document.getElementById('login-identifier').value = '';
-                document.getElementById('login-password').value = '';
-                return;
-            }
-
-            // 2. Coba Login Member (Menggunakan Apps Script Member)
             try {
+                // Member Login (Menggunakan Apps Script Member doPost action: memberLogin)
                 const response = await fetch(MEMBER_SHEET_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -420,16 +429,33 @@
                     currentUser = { role: 'member', memberId: result.memberId };
                     localStorage.setItem(AUTH_KEY, JSON.stringify(currentUser));
                     checkSession();
-                    document.getElementById('login-identifier').value = '';
-                    document.getElementById('login-password').value = '';
-                    return;
+                    document.getElementById('member-login-identifier').value = '';
+                    document.getElementById('member-login-password').value = '';
                 } else {
                     alertElement.textContent = 'Login gagal. Email/ID Member atau Password salah.';
                     alertElement.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                alertElement.textContent = 'Terjadi kesalahan saat menghubungi server. Pastikan Apps Script sudah benar.';
+                alertElement.textContent = 'Terjadi kesalahan saat menghubungi server.';
+                alertElement.classList.remove('hidden');
+            }
+        }
+
+        function adminLogin() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            const alertElement = document.getElementById('admin-login-alert');
+            alertElement.classList.add('hidden');
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                currentUser = { role: 'admin', username: ADMIN_USERNAME };
+                localStorage.setItem(AUTH_KEY, JSON.stringify(currentUser));
+                checkSession();
+                document.getElementById('admin-username').value = '';
+                document.getElementById('admin-password').value = '';
+            } else {
+                alertElement.textContent = 'Username atau password salah!';
                 alertElement.classList.remove('hidden');
             }
         }
@@ -438,9 +464,11 @@
             localStorage.removeItem(AUTH_KEY);
             currentUser = null;
             checkSession();
-            // Reset input login saat logout
-            document.getElementById('login-identifier').value = '';
-            document.getElementById('login-password').value = '';
+            // Clear inputs
+            document.getElementById('member-login-identifier').value = '';
+            document.getElementById('member-login-password').value = '';
+            document.getElementById('admin-username').value = '';
+            document.getElementById('admin-password').value = '';
             showPage('home'); 
         }
 
@@ -450,10 +478,11 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
+            // Highlight active button in main nav
             document.querySelectorAll('#main-nav-buttons .nav-btn').forEach(b => b.classList.remove('active'));
-            const clickedBtn = Array.from(document.querySelectorAll('#main-nav-buttons .nav-btn')).find(btn => btn.textContent.toLowerCase().includes(pageId.replace('-', ' ').split(' ')[1]));
+            const clickedBtn = Array.from(document.querySelectorAll('#main-nav-buttons .nav-btn')).find(btn => btn.textContent.toLowerCase().includes(pageId.replace('-', ' ').split(' ')[0]));
             if(clickedBtn) clickedBtn.classList.add('active');
-
+            
             if (pageId === 'admin-dashboard') {
                 showAdminSection('members'); 
             }
@@ -464,12 +493,16 @@
             document.querySelectorAll('#admin-dashboard .nav-buttons .nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('admin-' + section).classList.remove('hidden');
             
-            const sectionBtn = Array.from(document.querySelectorAll('#admin-dashboard .nav-buttons .nav-btn')).find(btn => btn.textContent.toLowerCase().includes(section));
+            const sectionBtn = document.getElementById(`nav-btn-${section}`);
             if(sectionBtn) sectionBtn.classList.add('active');
 
             if (section === 'members') loadMembers();
             if (section === 'transactions') loadTransactions();
-            if (section === 'scan') setupScanSection();
+            if (section === 'scan') {
+                loadMemberSelect(); 
+                document.getElementById('transaction-container').classList.add('hidden'); 
+                stopScanner();
+            }
         }
         
         // --- REGISTER MEMBER ---
@@ -481,7 +514,7 @@
             submitBtn.textContent = 'Mendaftar...';
             submitBtn.disabled = true;
 
-            const memberId = 'MBR' + Date.now().toString().slice(-8); // ID lebih singkat
+            const memberId = 'MBR' + Date.now().toString().slice(-8); 
             const formData = {
                 memberId: memberId,
                 nama: document.getElementById('nama').value,
@@ -490,7 +523,7 @@
                 telepon: document.getElementById('telepon').value,
                 alamat: document.getElementById('alamat').value,
                 kota: document.getElementById('kota').value,
-                kodePos: document.getElementById('kodePos').value || '-',
+                kodePos: document.getElementById('kodePos').value,
                 tanggalDaftar: new Date().toLocaleString('id-ID'),
                 qrCodeUrl: memberId,
                 totalPoin: 0 
@@ -524,7 +557,6 @@
                     <p><strong>Member ID:</strong> ${memberId}</p>
                     <p><strong>Nama:</strong> ${formData.nama}</p>
                     <p><strong>Email:</strong> ${formData.email}</p>
-                    <p><strong>Password:</strong> ${formData.password} <span style="color: red;">(WAJIB CATAT!)</span></p>
                     <p style="margin-top: 15px; color: #667eea;">Silakan gunakan Email/Password untuk Login.</p>
                 `;
 
@@ -546,7 +578,7 @@
             if (member) {
                 const currentPoin = parseInt(member.totalPoin) || 0;
                 document.getElementById('memberTotalPoin').textContent = currentPoin;
-                document.getElementById('memberIdDisplay').textContent = `Member ID: ${memberId}`;
+                document.getElementById('memberIdDisplay').textContent = `Member ID: ${memberId} | Email: ${member.email}`;
                 document.getElementById('exchangeCount').textContent = Math.floor(currentPoin / 250);
 
                 document.getElementById('member-dashboard-qrcode').innerHTML = '';
@@ -558,7 +590,7 @@
             }
         }
 
-        // --- ADMIN DASHBOARD LOGIC ---
+        // --- ADMIN DASHBOARD LOGIC (MEMBER TABLE) ---
         
         async function loadMembers() {
             try {
@@ -566,8 +598,8 @@
                 const response = await fetch(MEMBER_SHEET_URL);
                 membersData = await response.json();
 
+                // Update total stats
                 document.getElementById('totalMembers').textContent = membersData.length;
-                document.getElementById('totalTransactions').textContent = transactionsData.length || '...'; // Update setelah loadTransactions()
 
                 membersData.sort((a, b) => (parseInt(b.totalPoin) || 0) - (parseInt(a.totalPoin) || 0));
 
@@ -578,10 +610,10 @@
                 
                 const filteredMembers = membersData.filter(member => 
                     !search || 
-                    member.memberId.toLowerCase().includes(search) ||
-                    member.nama.toLowerCase().includes(search) ||
-                    member.email.toLowerCase().includes(search) ||
-                    member.telepon.includes(search)
+                    (member.memberId && member.memberId.toLowerCase().includes(search)) ||
+                    (member.nama && member.nama.toLowerCase().includes(search)) ||
+                    (member.email && member.email.toLowerCase().includes(search)) ||
+                    (member.telepon && member.telepon.includes(search))
                 );
 
 
@@ -589,12 +621,12 @@
                     const totalPoin = parseInt(member.totalPoin) || 0; 
                     const row = tbody.insertRow();
                     row.innerHTML = `
-                        <td>${member.memberId}</td>
-                        <td>${member.nama}</td>
-                        <td>${member.email}</td>
-                        <td>${member.telepon}</td>
+                        <td>${member.memberId || '-'}</td>
+                        <td>${member.nama || '-'}</td>
+                        <td>${member.email || '-'}</td>
+                        <td>${member.telepon || '-'}</td>
                         <td><strong>${totalPoin}</strong></td>
-                        <td>${member.tanggalDaftar}</td>
+                        <td>${member.tanggalDaftar || '-'}</td>
                     `;
                 });
             } catch (error) {
@@ -604,67 +636,37 @@
         
         document.getElementById('searchMember').addEventListener('input', loadMembers);
 
-        // Setup Scan/Transaction Section
-        function setupScanSection() {
-            document.getElementById('transactionType').removeEventListener('change', updateTransactionFormVisibility);
-            document.getElementById('transactionType').addEventListener('change', updateTransactionFormVisibility);
-            updateTransactionFormVisibility();
-        }
-
-        function updateTransactionFormVisibility() {
-            const type = document.getElementById('transactionType').value;
-            const purchaseFields = document.getElementById('purchaseFormFields');
-            const manualPoinGroup = document.getElementById('manualPoinGroup');
-            const manualPoinInput = document.getElementById('manualPoinValue');
-            
-            purchaseFields.classList.add('hidden');
-            manualPoinGroup.classList.remove('hidden');
-
-            if (type === 'PEMBELIAN_POIN') {
-                purchaseFields.classList.remove('hidden');
-                manualPoinGroup.classList.add('hidden');
-                manualPoinInput.value = 5; 
-            } else if (type === 'TUKAR_POIN') {
-                manualPoinInput.value = -250; 
-            } else if (type === 'MANUAL_TAMBAH') {
-                manualPoinInput.value = 50; 
-            } else { // MANUAL_KURANG
-                manualPoinInput.value = -50; 
-            }
-        }
+        // --- ADMIN DASHBOARD LOGIC (TRANSACTION INPUT) ---
         
-        function showManualSearch() {
-            stopScanner(); // Pastikan scanner mati
-            document.getElementById('manual-search-container').classList.remove('hidden');
+        function loadMemberSelect() {
+            const select = document.getElementById('memberSelect');
+            select.innerHTML = '<option value="">-- Pilih Member --</option>';
+            membersData.sort((a, b) => (a.nama || '').localeCompare(b.nama || '')); 
+            membersData.forEach(member => {
+                select.innerHTML += `<option value="${member.memberId}">${member.nama || '-'} (${member.memberId})</option>`;
+            });
+        }
+
+        function showManualSelect() {
+            document.getElementById('manual-select-container').classList.remove('hidden');
             document.getElementById('scanner-container').classList.add('hidden');
             document.getElementById('transaction-container').classList.add('hidden');
         }
 
-        function searchAndShowMember() {
-            const search = document.getElementById('memberSearchInput').value.toLowerCase().trim();
-            if (!search) {
-                alert('Masukkan ID, Nama, Email, atau Telepon!');
+        function selectMemberManual() {
+            const memberId = document.getElementById('memberSelect').value;
+            if (!memberId) {
+                alert('Pilih member terlebih dahulu!');
                 return;
             }
-
-            const member = membersData.find(m => 
-                m.memberId.toLowerCase() === search ||
-                m.nama.toLowerCase().includes(search) ||
-                m.email.toLowerCase() === search ||
-                m.telepon.includes(search)
-            );
-            
-            if (member) {
-                showTransactionForm(member);
-            } else {
-                alert('Member tidak ditemukan!');
-            }
+            const member = membersData.find(m => m.memberId === memberId);
+            showTransactionForm(member);
         }
 
         // QR Scanner
         function startScanner() {
             document.getElementById('scanner-container').classList.remove('hidden');
-            document.getElementById('manual-search-container').classList.add('hidden');
+            document.getElementById('manual-select-container').classList.add('hidden');
             document.getElementById('transaction-container').classList.add('hidden');
 
             html5QrCode = new Html5Qrcode("reader");
@@ -704,57 +706,87 @@
             document.getElementById('selectedMemberName').textContent = member.nama;
             document.getElementById('selectedMemberPoints').textContent = parseInt(member.totalPoin) || 0;
             document.getElementById('transaction-container').classList.remove('hidden');
-            document.getElementById('manual-search-container').classList.add('hidden');
+            document.getElementById('manual-select-container').classList.add('hidden');
+            document.getElementById('scanner-container').classList.add('hidden');
             
-            // Reset form
+            // Reset form dan update tampilan
+            document.getElementById('transactionType').value = 'PEMBELIAN_POIN';
             document.getElementById('jumlahItem').value = '1';
             document.getElementById('totalHarga').value = '';
-            document.getElementById('transactionType').value = 'PEMBELIAN_POIN';
-            updateTransactionFormVisibility();
+            updateTransactionForm();
         }
 
-        // Submit Transaction (Poin +/-)
+        function updateTransactionForm() {
+            const type = document.getElementById('transactionType').value;
+            const purchaseFields = document.getElementById('purchaseFields');
+            const manualPoinField = document.getElementById('manualPoinField');
+            
+            purchaseFields.classList.add('hidden');
+            manualPoinField.classList.add('hidden');
+
+            if (type === 'PEMBELIAN_POIN') {
+                purchaseFields.classList.remove('hidden');
+            } else if (type === 'TUKAR_POIN') {
+                alert('Transaksi Tukar Poin akan mengurangi 250 Poin. Pastikan member setuju.');
+            } else if (type === 'MANUAL_TAMBAH' || type === 'MANUAL_KURANG') {
+                manualPoinField.classList.remove('hidden');
+                document.getElementById('manualPoinValue').value = (type === 'MANUAL_TAMBAH') ? 50 : -50; 
+            }
+        }
+
         async function submitTransaction() {
             if (!selectedMember) return;
 
             const transactionType = document.getElementById('transactionType').value;
+            const currentPoin = parseInt(selectedMember.totalPoin) || 0;
             let poinChange = 0;
             let totalHarga = 0;
             let jumlahItem = 0;
             let produk = 'Martabak';
-            const currentPoin = parseInt(selectedMember.totalPoin) || 0;
 
+            // 1. Calculate Poin Change and Get Data
             if (transactionType === 'PEMBELIAN_POIN') {
-                jumlahItem = parseInt(document.getElementById('jumlahItem').value);
-                totalHarga = parseInt(document.getElementById('totalHarga').value);
-                if (!jumlahItem || !totalHarga || isNaN(totalHarga)) { alert('Lengkapi data pembelian!'); return; }
+                jumlahItem = parseInt(document.getElementById('jumlahItem').value) || 0;
+                totalHarga = parseInt(document.getElementById('totalHarga').value) || 0;
+                if (!jumlahItem || !totalHarga || isNaN(totalHarga)) { 
+                    alert('Lengkapi data Jumlah Item dan Total Harga!'); 
+                    return; 
+                }
                 poinChange = jumlahItem * 5;
                 produk = 'Martabak';
-            } else { 
-                poinChange = parseInt(document.getElementById('manualPoinValue').value);
-                produk = (transactionType === 'TUKAR_POIN') ? 'Tukar Martabak Gratis' : (poinChange > 0 ? 'Manual Tambah Poin' : 'Manual Kurang Poin');
+            } else if (transactionType === 'TUKAR_POIN') {
+                poinChange = -250;
+                produk = 'Tukar Martabak Gratis';
                 jumlahItem = 1;
-                totalHarga = 0;
+            } else if (transactionType === 'MANUAL_TAMBAH' || transactionType === 'MANUAL_KURANG') {
+                poinChange = parseInt(document.getElementById('manualPoinValue').value) || 0;
+                produk = (poinChange > 0) ? 'Manual Tambah Poin' : 'Manual Kurang Poin';
+                jumlahItem = 1;
+                if (poinChange === 0) {
+                     alert('Masukkan nilai poin yang valid untuk transaksi manual.'); 
+                    return; 
+                }
             }
             
-            if (isNaN(poinChange)) { alert('Masukkan nilai poin yang valid!'); return; }
-
             const totalPoinBaru = currentPoin + poinChange;
 
-            // Safety check for Poin Reduction
+            // 2. Safety Checks
             if (totalPoinBaru < 0) {
-                alert(`Poin member (${currentPoin}) tidak cukup untuk operasi ini (${poinChange}). Poin akan menjadi ${totalPoinBaru}.`);
+                alert(`Poin member (${currentPoin}) tidak cukup untuk operasi ini (${poinChange}). Transaksi dibatalkan.`);
                 return;
             }
-            
             if (transactionType === 'TUKAR_POIN' && currentPoin < 250) {
-                alert(`Poin member (${currentPoin}) kurang dari 250 untuk penukaran martabak gratis!`);
+                alert(`Poin member (${currentPoin}) kurang dari 250 untuk penukaran martabak gratis! Transaksi dibatalkan.`);
                 return;
             }
 
+            const submitBtn = document.querySelector('#transaction-container button.btn-primary');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Memproses...';
+            submitBtn.disabled = true;
 
             const transactionData = {
-                transactionId: 'TRX' + Date.now(),
+                transactionId: 'TRX' + Date.now().toString().slice(-10),
                 tanggalWaktu: new Date().toLocaleString('id-ID'),
                 memberId: selectedMember.memberId,
                 namaMember: selectedMember.nama,
@@ -762,69 +794,67 @@
                 jumlahItem: jumlahItem,
                 totalHarga: totalHarga,
                 poinDidapat: poinChange,
-                totalPoinSekarang: totalPoinBaru,
+                totalPoinSekarang: totalPoinBaru, 
                 tipeTransaksi: transactionType,
                 action: 'addTransaction' 
             };
             
-            const updatePoinData = {
-                memberId: selectedMember.memberId,
-                newTotalPoin: totalPoinBaru,
-                action: 'updatePoin' 
-            };
-            
-            const submitBtn = document.querySelector('#transaction-container button.btn-primary');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Memproses...';
-            submitBtn.disabled = true;
-
+            // 3. Update Poin di Apps Script Member
             try {
-                // 1. Update Poin di Apps Script Member
                 const updatePoinRes = await fetch(MEMBER_SHEET_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updatePoinData)
+                    body: JSON.stringify({ 
+                        action: 'updatePoin',
+                        memberId: selectedMember.memberId, 
+                        newTotalPoin: totalPoinBaru
+                    })
                 });
                 const updatePoinResult = await updatePoinRes.json();
                 
-                if (updatePoinResult.status !== 'success') throw new Error('Gagal update poin di Apps Script Member.');
+                if (updatePoinResult.status !== 'success') {
+                    throw new Error('Gagal update poin member. Cek Apps Script Member.');
+                }
 
-                // 2. Kirim Transaksi ke Apps Script Transaksi
+            } catch (error) {
+                 alert('Error saat Update Poin: ' + error.message);
+                 submitBtn.textContent = originalText;
+                 submitBtn.disabled = false;
+                 return;
+            }
+
+            // 4. Kirim Data Transaksi ke Apps Script Transaksi
+            try {
                 const addTrxRes = await fetch(TRANSACTION_SHEET_URL, {
                     method: 'POST',
+                    mode: 'no-cors', 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(transactionData)
                 });
-                const addTrxResult = await addTrxRes.json();
+                
+                alert(`✅ Transaksi ${transactionType.replace('_', ' ')} Berhasil!\n\n` +
+                      `Poin: ${poinChange > 0 ? '+' : ''}${poinChange}\n` +
+                      `Total poin sekarang: ${totalPoinBaru}`);
 
-                if (addTrxResult.status !== 'success' && addTrxRes.status !== 200) { 
-                    console.warn("Peringatan: Gagal menyimpan riwayat transaksi. Cek Apps Script Transaksi.");
-                }
-
-
-                alert(`✅ Transaksi berhasil!\n\nMember: ${selectedMember.nama}\nPoin: ${poinChange > 0 ? '+' : ''}${poinChange}\nTotal poin sekarang: ${totalPoinBaru}`);
-
+                // Reset
                 document.getElementById('transaction-container').classList.add('hidden');
                 selectedMember = null;
-                document.getElementById('memberSearchInput').value = '';
 
+                // Reload data
                 await loadMembers();
-                if (document.getElementById('admin-transactions').classList.contains('active')) {
-                    loadTransactions();
-                }
+                await loadTransactions();
             } catch (error) {
-                alert('Terjadi kesalahan saat menyimpan transaksi: ' + error.message);
+                 alert('Error saat Simpan Transaksi: ' + error.message + '. Poin member sudah terupdate. Cek Apps Script Transaksi.');
             }
             
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
         }
 
-        // Load Transactions (Menggunakan Apps Script Transaksi)
+        // --- ADMIN DASHBOARD LOGIC (TRANSACTION HISTORY) ---
         async function loadTransactions() {
-             try {
-                // Fetch data dari Apps Script Transaksi
-                const response = await fetch(TRANSACTION_SHEET_URL); 
+            try {
+                const response = await fetch(TRANSACTION_SHEET_URL);
                 transactionsData = await response.json();
 
                 document.getElementById('totalTransactions').textContent = transactionsData.length;
@@ -833,18 +863,22 @@
                 tbody.innerHTML = '';
 
                 transactionsData.reverse().forEach(trx => {
-                    const row = tbody.insertRow();
                     const poinVal = parseInt(trx.poinDidapat) || 0;
                     const totalHarga = parseInt(trx.totalHarga) || 0;
+                    const totalPoinSekarang = parseInt(trx.totalPoinSekarang) || 0;
+                    
+                    const row = tbody.insertRow();
                     row.innerHTML = `
-                        <td>${trx.transactionId}</td>
-                        <td>${trx.tanggalWaktu}</td>
-                        <td>${trx.memberId}</td>
-                        <td>${trx.namaMember}</td>
-                        <td>${trx.produk}</td>
-                        <td>${trx.jumlahItem}</td> <td>Rp ${totalHarga.toLocaleString('id-ID')}</td>
+                        <td>${trx.transactionId || '-'}</td>
+                        <td>${trx.tanggalWaktu || '-'}</td>
+                        <td>${trx.memberId || '-'}</td>
+                        <td>${trx.namaMember || '-'}</td>
+                        <td>${trx.produk || '-'}</td>
+                        <td>${trx.jumlahItem || 0}</td>
+                        <td>Rp ${totalHarga.toLocaleString('id-ID')}</td>
                         <td><strong style="color: ${poinVal > 0 ? 'green' : 'red'};">${poinVal > 0 ? '+' : ''}${poinVal}</strong></td>
-                        <td>${trx.tipeTransaksi.replace('_', ' ')}</td>
+                        <td>${totalPoinSekarang}</td>
+                        <td>${(trx.tipeTransaksi || '-').replace('_', ' ')}</td>
                     `;
                 });
             } catch (error) {
@@ -865,14 +899,12 @@
 
         function closeModal() {
             document.getElementById('successModal').classList.remove('active');
-            checkSession();
-            showPage('member-admin-login');
+            // Arahkan ke member login setelah berhasil daftar
+            showPage('member-login');
         }
 
         // Initialize
         window.onload = function() {
-            // Load transactions in background to update admin stats
-            loadTransactions(); 
             checkSession();
         }
     </script>
