@@ -56,12 +56,23 @@
         .member-dashboard-card { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
         .member-dashboard-card h2 { font-size: 3em; margin: 10px 0; }
         .member-dashboard-card p { font-size: 1.2em; }
+        
+        /* FIX MASALAH 2: JUDUL ADMIN TIDAK TERLIHAT */
+        .admin-section h3 {
+            color: white; /* Jadikan warna judul putih agar terlihat di latar belakang ungu/biru */
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         @media (max-width: 600px) {
              .input-group { flex-direction: column; gap: 0; }
         }
     </style>
 </head>
-<body>
+<body onload="checkSession()">
     <div class="container">
         <div class="header">
             <h1>🥞 Sistem Member Martabak</h1>
@@ -104,31 +115,31 @@
                 <p style="color: red; margin-bottom: 20px;">* Email dan Password WAJIB diisi untuk login.</p>
                 <div class="form-group">
                     <label>Nama Lengkap *</label>
-                    <input type="text" id="nama" required>
+                    <input type="text" id="nama" name="nama" required>
                 </div>
                 <div class="form-group">
                     <label>Email * (Identitas Utama/Login)</label>
-                    <input type="email" id="email" required>
+                    <input type="email" id="email" name="email" required>
                 </div>
                 <div class="form-group">
                     <label>Password * (Untuk Login)</label>
-                    <input type="password" id="member-password" required>
+                    <input type="password" id="member-password" name="password" required>
                 </div>
                 <div class="form-group">
                     <label>No. Telepon/WhatsApp *</label>
-                    <input type="tel" id="telepon" required>
+                    <input type="tel" id="telepon" name="telepon" required>
                 </div>
                 <div class="form-group">
                     <label>Alamat Lengkap</label>
-                    <textarea id="alamat" rows="3"></textarea>
+                    <textarea id="alamat" name="alamat" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Kota</label>
-                    <input type="text" id="kota">
+                    <input type="text" id="kota" name="kota">
                 </div>
                 <div class="form-group">
                     <label>Kode Pos</label>
-                    <input type="text" id="kodePos">
+                    <input type="text" id="kodePos" name="kodePos">
                 </div>
                 <button type="submit" class="btn btn-primary">Daftar Sekarang</button>
             </form>
@@ -206,6 +217,7 @@
             </div>
 
             <div id="admin-members" class="admin-section">
+                <h3>Daftar Member</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3 id="totalMembers">0</h3>
@@ -236,7 +248,7 @@
             </div>
 
             <div id="admin-scan" class="admin-section hidden">
-                <h3 style="color: #667eea; margin-bottom: 20px;">Scan QR Code Member atau Pilih Manual</h3>
+                <h3>Input Transaksi</h3>
                 
                 <div style="display: flex; gap: 15px; margin-bottom: 20px;">
                     <button class="btn btn-primary" style="width: auto;" onclick="startScanner()">📷 Scan QR Code</button>
@@ -304,7 +316,7 @@
             </div>
 
             <div id="admin-transactions" class="admin-section hidden">
-                <h3 style="color: #667eea; margin-bottom: 20px;">History Transaksi</h3>
+                <h3>History Transaksi</h3>
                 <div style="overflow-x: auto;">
                     <table class="member-table">
                         <thead>
@@ -317,7 +329,6 @@
                                 <th>Jumlah Item</th>
                                 <th>Total Harga</th>
                                 <th>Poin Didapat</th>
-                                <th>Total Poin Sekarang</th>
                                 <th>Tipe Transaksi</th>
                             </tr>
                         </thead>
@@ -343,7 +354,7 @@
     </div>
 
     <script>
-        // --- KONFIGURASI URL ANDA (Telah diganti) ---
+        // --- KONFIGURASI URL ANDA ---
         const MEMBER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzwa_Tf1b5kqi3WHonPL8m0UBGxjCYDiOw6-nDS5an639X1QtmzV4vvuCeDwZ7ERdQX/exec';
         const TRANSACTION_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwClEfSUy_28FKeEuu9VXht-BK_R7syaMZVsl50Q-wNEl-z5ElGqN6NnVr_vmnY4935/exec';
 
@@ -367,8 +378,8 @@
             if (currentUser) {
                 if (currentUser.role === 'admin') {
                     showPage('admin-dashboard');
-                    loadMembers();
-                    loadTransactions(); 
+                    loadMembers(); // Panggil di sini
+                    loadTransactions(); // Panggil di sini
                 } else if (currentUser.role === 'member') {
                     showPage('member-dashboard');
                     loadMemberDashboard(currentUser.memberId);
@@ -401,6 +412,7 @@
             }
         }
         
+        // FIX MASALAH 1: MEMBER LOGIN
         async function memberLogin() {
             const identifier = document.getElementById('member-login-identifier').value.trim();
             const password = document.getElementById('member-login-password').value;
@@ -414,6 +426,7 @@
             }
 
             try {
+                // Kirim identifier dan password ke Apps Script untuk diverifikasi
                 const response = await fetch(MEMBER_SHEET_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -437,7 +450,7 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                alertElement.textContent = 'Terjadi kesalahan saat menghubungi server.';
+                alertElement.textContent = 'Terjadi kesalahan saat menghubungi server. Pastikan Deploy Apps Script sudah benar.';
                 alertElement.classList.remove('hidden');
             }
         }
@@ -464,6 +477,7 @@
             localStorage.removeItem(AUTH_KEY);
             currentUser = null;
             checkSession();
+            // Clear all input fields on logout
             document.getElementById('member-login-identifier').value = '';
             document.getElementById('member-login-password').value = '';
             document.getElementById('admin-username').value = '';
@@ -482,6 +496,7 @@
             if(clickedBtn) clickedBtn.classList.add('active');
             
             if (pageId === 'admin-dashboard') {
+                // Pastikan admin section yang pertama aktif
                 showAdminSection('members'); 
             }
         }
@@ -494,16 +509,19 @@
             const sectionBtn = document.getElementById(`nav-btn-${section}`);
             if(sectionBtn) sectionBtn.classList.add('active');
 
+            // Panggil ulang data setiap kali pindah seksi
             if (section === 'members') loadMembers();
             if (section === 'transactions') loadTransactions();
             if (section === 'scan') {
-                loadMemberSelect(); 
+                // Reset form input transaksi
                 document.getElementById('transaction-container').classList.add('hidden'); 
                 stopScanner();
+                loadMemberSelect(); // FIX MASALAH 4: Pastikan select box terisi
             }
         }
         
         // --- REGISTER MEMBER ---
+        // FIX MASALAH 3: Pendaftaran (Tambahkan Password ke data form)
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -517,7 +535,7 @@
                 memberId: memberId,
                 nama: document.getElementById('nama').value,
                 email: document.getElementById('email').value,
-                password: document.getElementById('member-password').value, 
+                password: document.getElementById('member-password').value, // BARU: Tambahkan password
                 telepon: document.getElementById('telepon').value,
                 alamat: document.getElementById('alamat').value,
                 kota: document.getElementById('kota').value,
@@ -569,6 +587,7 @@
         });
 
         // --- MEMBER DASHBOARD LOGIC ---
+        // FIX INDEX POIN: Poin sekarang di index 8
         async function loadMemberDashboard(memberId) {
             await loadMembers(); 
             const member = membersData.find(m => m.memberId === memberId);
@@ -589,7 +608,7 @@
         }
 
         // --- ADMIN DASHBOARD LOGIC (MEMBER TABLE) ---
-        
+        // FIX INDEX POIN: Poin sekarang di index 8
         async function loadMembers() {
             try {
                 const response = await fetch(MEMBER_SHEET_URL);
@@ -629,7 +648,7 @@
                 });
             } catch (error) {
                 console.error('Error loading members:', error);
-                document.getElementById('memberTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data member. Cek Apps Script.</td></tr>`;
+                document.getElementById('memberTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data member. Cek Apps Script dan CORS.</td></tr>`;
             }
         }
         
@@ -637,7 +656,12 @@
 
         // --- ADMIN DASHBOARD LOGIC (TRANSACTION INPUT) ---
         
-        function loadMemberSelect() {
+        // FIX MASALAH 4: Pastikan select box terisi
+        async function loadMemberSelect() {
+            // Pastikan data member sudah dimuat
+            if (membersData.length === 0) {
+                await loadMembers();
+            }
             const select = document.getElementById('memberSelect');
             select.innerHTML = '<option value="">-- Pilih Member --</option>';
             membersData.sort((a, b) => (a.nama || '').localeCompare(b.nama || '')); 
@@ -650,6 +674,7 @@
             document.getElementById('manual-select-container').classList.remove('hidden');
             document.getElementById('scanner-container').classList.add('hidden');
             document.getElementById('transaction-container').classList.add('hidden');
+            stopScanner();
         }
 
         function selectMemberManual() {
@@ -668,13 +693,18 @@
             document.getElementById('manual-select-container').classList.add('hidden');
             document.getElementById('transaction-container').classList.add('hidden');
 
+            // Panggil stop sebelum start, untuk berjaga-jaga
+            if (html5QrCode && html5QrCode.isScanning) {
+                 html5QrCode.stop().catch(err => console.error("Error stopping scanner before new start:", err));
+            }
+
             html5QrCode = new Html5Qrcode("reader");
             html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 250 },
                 onScanSuccess
             ).catch(err => {
-                alert('Tidak dapat mengakses kamera: ' + err);
+                alert('Tidak dapat mengakses kamera. Pastikan Anda menggunakan HTTPS atau mengizinkan akses kamera: ' + err);
             });
         }
 
@@ -696,6 +726,8 @@
                     console.error("Error stopping scanner:", err);
                     document.getElementById('scanner-container').classList.add('hidden');
                 });
+            } else {
+                document.getElementById('scanner-container').classList.add('hidden');
             }
         }
 
@@ -737,18 +769,19 @@
             if (!selectedMember) return;
 
             const transactionType = document.getElementById('transactionType').value;
-            const currentPoin = parseInt(selectedMember.totalPoin) || 0;
+            // FIX INDEX POIN: Poin diambil dari properti object member, yang sudah benar
+            const currentPoin = parseInt(selectedMember.totalPoin) || 0; 
             let poinChange = 0;
             let totalHarga = 0;
             let jumlahItem = 0;
-            let produk = 'Martabak';
+            let produk = '';
 
             // 1. Calculate Poin Change and Get Data
             if (transactionType === 'PEMBELIAN_POIN') {
                 jumlahItem = parseInt(document.getElementById('jumlahItem').value) || 0;
                 totalHarga = parseInt(document.getElementById('totalHarga').value) || 0;
-                if (!jumlahItem || !totalHarga || isNaN(totalHarga)) { 
-                    alert('Lengkapi data Jumlah Item dan Total Harga!'); 
+                if (jumlahItem <= 0 || totalHarga <= 0 || isNaN(totalHarga)) { 
+                    alert('Lengkapi data Jumlah Item dan Total Harga dengan benar!'); 
                     return; 
                 }
                 poinChange = jumlahItem * 5;
@@ -757,10 +790,12 @@
                 poinChange = -250;
                 produk = 'Tukar Martabak Gratis (250 Poin)';
                 jumlahItem = 1;
+                totalHarga = 0; // Karena gratis
             } else if (transactionType === 'MANUAL_TAMBAH' || transactionType === 'MANUAL_KURANG') {
                 poinChange = parseInt(document.getElementById('manualPoinValue').value) || 0;
-                produk = (poinChange > 0) ? `Manual Tambah Poin (${poinChange})` : `Manual Kurang Poin (${poinChange})`;
+                produk = (poinChange > 0) ? `Manual Tambah Poin` : `Manual Kurang Poin`;
                 jumlahItem = 1;
+                totalHarga = 0;
                 if (poinChange === 0) {
                      alert('Masukkan nilai poin yang valid untuk transaksi manual.'); 
                     return; 
@@ -793,20 +828,20 @@
                 jumlahItem: jumlahItem,
                 totalHarga: totalHarga,
                 poinDidapat: poinChange,
-                totalPoinSekarang: totalPoinBaru, 
                 tipeTransaksi: transactionType.replace('_', ' '),
                 action: 'addTransaction' 
             };
             
             // 3. Update Poin di Apps Script Member
             try {
+                // Gunakan poinDidapat, bukan totalPoinBaru, agar Apps Script menghitung sendiri
                 const updatePoinRes = await fetch(MEMBER_SHEET_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         action: 'updatePoin',
                         memberId: selectedMember.memberId, 
-                        newTotalPoin: totalPoinBaru
+                        poinDidapat: poinChange // Kirim perubahannya
                     })
                 });
                 const updatePoinResult = await updatePoinRes.json();
@@ -814,6 +849,9 @@
                 if (updatePoinResult.status !== 'success') {
                     throw new Error('Gagal update poin member. Cek Apps Script Member. ' + (updatePoinResult.message || ''));
                 }
+                
+                // Update poin di memori lokal agar tidak perlu reload semua
+                selectedMember.totalPoin = updatePoinResult.newTotalPoin; 
 
             } catch (error) {
                  alert('Error saat Update Poin: ' + error.message);
@@ -826,20 +864,25 @@
             try {
                 const addTrxRes = await fetch(TRANSACTION_SHEET_URL, {
                     method: 'POST',
-                    mode: 'no-cors', 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(transactionData)
                 });
+                const addTrxResult = await addTrxRes.json();
                 
+                if (addTrxResult.status !== 'success') {
+                    throw new Error('Gagal menyimpan Transaksi. Cek Apps Script Transaksi. ' + (addTrxResult.message || ''));
+                }
+
                 alert(`✅ Transaksi ${transactionData.tipeTransaksi} Berhasil!\n\n` +
                       `Poin: ${poinChange > 0 ? '+' : ''}${poinChange}\n` +
-                      `Total poin sekarang: ${totalPoinBaru}`);
+                      `Total poin sekarang: ${selectedMember.totalPoin}`);
 
                 // Reset
                 document.getElementById('transaction-container').classList.add('hidden');
                 selectedMember = null;
+                document.getElementById('memberSelect').value = '';
 
-                // Reload data
+                // Reload data di admin dashboard
                 await loadMembers();
                 await loadTransactions();
             } catch (error) {
@@ -868,7 +911,6 @@
                 transactionsData.reverse().forEach(trx => {
                     const poinVal = parseInt(trx.poinDidapat) || 0;
                     const totalHarga = parseInt(trx.totalHarga) || 0;
-                    const totalPoinSekarang = parseInt(trx.totalPoinSekarang) || 0;
                     
                     const row = tbody.insertRow();
                     row.innerHTML = `
@@ -880,13 +922,12 @@
                         <td>${trx.jumlahItem || 0}</td>
                         <td>Rp ${totalHarga.toLocaleString('id-ID')}</td>
                         <td><strong style="color: ${poinVal >= 0 ? 'green' : 'red'};">${poinVal > 0 ? '+' : ''}${poinVal}</strong></td>
-                        <td>${totalPoinSekarang}</td>
                         <td>${trx.tipeTransaksi || '-'}</td>
                     `;
                 });
             } catch (error) {
                 console.error('Error loading transactions:', error);
-                document.getElementById('transactionTableBody').innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data transaksi. Cek Apps Script.</td></tr>`;
+                document.getElementById('transactionTableBody').innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Gagal memuat data transaksi. Cek Apps Script dan CORS.</td></tr>`;
             }
         }
 
@@ -904,11 +945,6 @@
         function closeModal() {
             document.getElementById('successModal').classList.remove('active');
             showPage('member-login');
-        }
-
-        // Initialize
-        window.onload = function() {
-            checkSession();
         }
     </script>
 </body>
