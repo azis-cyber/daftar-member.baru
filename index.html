@@ -56,8 +56,6 @@
         .member-dashboard-card { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; }
         .member-dashboard-card h2 { font-size: 3em; margin: 10px 0; }
         .member-dashboard-card p { font-size: 1.2em; }
-        
-        /* FIX MASALAH 2: JUDUL ADMIN TERLIHAT */
         .admin-section h3 {
             color: white; 
             background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
@@ -329,6 +327,7 @@
                                 <th>Jumlah Item</th>
                                 <th>Total Harga</th>
                                 <th>Poin Didapat</th>
+                                <th>Total Poin Sekarang</th>
                                 <th>Tipe Transaksi</th>
                             </tr>
                         </thead>
@@ -354,13 +353,14 @@
     </div>
 
     <script>
-        // --- KONFIGURASI URL ANDA (PASTIKAN INI ADALAH URL DEPLOYMENT TERBARU ANDA) ---
-        const MEMBER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzwa_Tf1b5kqi3WHonPL8m0UBGxjCYDiOw6-nDS5an639X1QtmzV4vvuCeDwZ7ERdQX/exec';
-        const TRANSACTION_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwClEfSUy_28FKeEuu9VXht-BK_R7syaMZVsl50Q-wNEl-z5ElGqN6NnVr_vmnY4935/exec';
-
+        // --- KONFIGURASI URL APPS SCRIPT ---
+        // ⚠️ GANTI KEDUA PLACEHOLDER INI dengan URL /exec setelah Anda mendeploy Apps Script di bagian 1 dan 2
+        const MEMBER_SHEET_URL = 'PLACEHOLDER_URL_MEMBER';
+        const TRANSACTION_SHEET_URL = 'PLACEHOLDER_URL_TRANSAKSI';
+        
         // --- KONFIGURASI ADMIN ---
         const ADMIN_USERNAME = 'martabak'; 
-        const ADMIN_PASSWORD = '189189';
+        const ADMIN_PASSWORD = '189189'; // Password Admin
         const AUTH_KEY = 'martabak_auth';
 
         let membersData = [];
@@ -412,7 +412,7 @@
             }
         }
         
-        // FIX MASALAH 1: MEMBER LOGIN
+        // MEMBER LOGIN
         async function memberLogin() {
             const identifier = document.getElementById('member-login-identifier').value.trim();
             const password = document.getElementById('member-login-password').value;
@@ -426,7 +426,6 @@
             }
 
             try {
-                // Mengirim permintaan ke Apps Script dengan action: 'memberLogin'
                 const response = await fetch(MEMBER_SHEET_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -436,7 +435,7 @@
                         password: password 
                     })
                 });
-                // Penting: Apps Script harus mengembalikan JSON dengan header CORS
+                
                 const result = await response.json(); 
                 
                 if (result.status === 'success') {
@@ -450,8 +449,8 @@
                     alertElement.classList.remove('hidden');
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                alertElement.textContent = 'Terjadi kesalahan jaringan atau Apps Script. Cek konsol browser (F12) dan Deployment Apps Script.';
+                console.error('Login error (CORS/Server):', error);
+                alertElement.textContent = 'Terjadi kesalahan saat menghubungi server. Pastikan URL Apps Script sudah benar!';
                 alertElement.classList.remove('hidden');
             }
         }
@@ -511,14 +510,13 @@
             if (section === 'members') loadMembers();
             if (section === 'transactions') loadTransactions();
             if (section === 'scan') {
+                loadMemberSelect(); 
                 document.getElementById('transaction-container').classList.add('hidden'); 
                 stopScanner();
-                loadMemberSelect(); 
             }
         }
         
-        // --- REGISTER MEMBER ---
-        // FIX MASALAH 3: Pendaftaran (Form POST ke Apps Script)
+        // --- REGISTER MEMBER (Menggunakan Form POST untuk keandalan) ---
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -532,7 +530,7 @@
                 memberId: memberId,
                 nama: document.getElementById('nama').value,
                 email: document.getElementById('email').value,
-                password: document.getElementById('member-password').value, // Mengirim password
+                password: document.getElementById('member-password').value, 
                 telepon: document.getElementById('telepon').value,
                 alamat: document.getElementById('alamat').value,
                 kota: document.getElementById('kota').value,
@@ -543,7 +541,7 @@
             };
 
             try {
-                // Menggunakan form submission untuk pendaftaran (ini lebih aman dari CORS untuk form)
+                // Menggunakan form submission untuk pendaftaran (melalui iframe)
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = MEMBER_SHEET_URL;
@@ -561,10 +559,8 @@
                 form.submit();
                 document.body.removeChild(form);
 
-                // Tunggu sebentar untuk Apps Script memproses
-                await new Promise(resolve => setTimeout(resolve, 1500)); 
+                await new Promise(resolve => setTimeout(resolve, 1500)); // Tunggu Apps Script selesai
 
-                // Tampilkan Modal Sukses
                 document.getElementById('qrcode').innerHTML = '';
                 new QRCode(document.getElementById('qrcode'), { text: memberId, width: 200, height: 200 });
                 document.getElementById('memberInfo').innerHTML = `
@@ -578,14 +574,13 @@
                 document.getElementById('registerForm').reset();
                 
             } catch (error) {
-                alert('Terjadi kesalahan saat pendaftaran. Cek konsol browser (F12): ' + error.message);
+                alert('Terjadi kesalahan saat pendaftaran. Cek konsol browser (F12) dan pastikan URL Apps Script sudah benar: ' + error.message);
             }
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
         });
 
         // --- MEMBER DASHBOARD LOGIC ---
-        // Poin diambil dari index 8
         async function loadMemberDashboard(memberId) {
             await loadMembers(); 
             const member = membersData.find(m => m.memberId === memberId);
@@ -606,7 +601,6 @@
         }
 
         // --- ADMIN DASHBOARD LOGIC (MEMBER TABLE) ---
-        // Poin diambil dari index 8
         async function loadMembers() {
             try {
                 const response = await fetch(MEMBER_SHEET_URL);
@@ -644,8 +638,8 @@
                     `;
                 });
             } catch (error) {
-                console.error('Error loading members (Penting: cek CORS dan URL deployment):', error);
-                document.getElementById('memberTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data member. Cek Apps Script dan CORS.</td></tr>`;
+                console.error('Error loading members (Cek Apps Script Member dan URL):', error);
+                document.getElementById('memberTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data member. Cek Apps Script Member dan URL.</td></tr>`;
             }
         }
         
@@ -653,11 +647,7 @@
 
         // --- ADMIN DASHBOARD LOGIC (TRANSACTION INPUT) ---
         
-        // FIX MASALAH 4: MANUAL SELECT
-        async function loadMemberSelect() {
-            if (membersData.length === 0) {
-                await loadMembers();
-            }
+        function loadMemberSelect() {
             const select = document.getElementById('memberSelect');
             select.innerHTML = '<option value="">-- Pilih Member --</option>';
             membersData.sort((a, b) => (a.nama || '').localeCompare(b.nama || '')); 
@@ -671,7 +661,7 @@
             document.getElementById('scanner-container').classList.add('hidden');
             document.getElementById('transaction-container').classList.add('hidden');
             stopScanner();
-            loadMemberSelect(); // Pastikan select box terisi
+            loadMemberSelect(); 
         }
 
         function selectMemberManual() {
@@ -684,9 +674,8 @@
             showTransactionForm(member);
         }
 
-        // QR Scanner (Logika tetap sama)
+        // QR Scanner
         function startScanner() {
-            // ... (Kode scanner)
             document.getElementById('scanner-container').classList.remove('hidden');
             document.getElementById('manual-select-container').classList.add('hidden');
             document.getElementById('transaction-container').classList.add('hidden');
@@ -732,7 +721,6 @@
             selectedMember = member;
             document.getElementById('selectedMemberId').textContent = member.memberId;
             document.getElementById('selectedMemberName').textContent = member.nama;
-            // Poin yang ditampilkan diambil dari data yang sudah di-load (index 8)
             document.getElementById('selectedMemberPoints').textContent = parseInt(member.totalPoin) || 0; 
             document.getElementById('transaction-container').classList.remove('hidden');
             document.getElementById('manual-select-container').classList.add('hidden');
@@ -774,7 +762,6 @@
             
             // Logika perhitungan poin
             if (transactionType === 'PEMBELIAN_POIN') {
-                // ... (Perhitungan Poin Pembelian)
                 jumlahItem = parseInt(document.getElementById('jumlahItem').value) || 0;
                 totalHarga = parseInt(document.getElementById('totalHarga').value) || 0;
                 if (jumlahItem <= 0 || totalHarga <= 0 || isNaN(totalHarga)) { 
@@ -784,13 +771,11 @@
                 poinChange = jumlahItem * 5;
                 produk = 'Pembelian Martabak';
             } else if (transactionType === 'TUKAR_POIN') {
-                // ... (Perhitungan Poin Tukar)
                 poinChange = -250;
                 produk = 'Tukar Martabak Gratis (250 Poin)';
                 jumlahItem = 1;
                 totalHarga = 0;
             } else if (transactionType === 'MANUAL_TAMBAH' || transactionType === 'MANUAL_KURANG') {
-                // ... (Perhitungan Poin Manual)
                 poinChange = parseInt(document.getElementById('manualPoinValue').value) || 0;
                 produk = (poinChange > 0) ? `Manual Tambah Poin` : `Manual Kurang Poin`;
                 jumlahItem = 1;
@@ -827,6 +812,7 @@
                 jumlahItem: jumlahItem,
                 totalHarga: totalHarga,
                 poinDidapat: poinChange,
+                totalPoinSekarang: totalPoinBaru,
                 tipeTransaksi: transactionType.replace('_', ' '),
                 action: 'addTransaction' 
             };
@@ -839,7 +825,7 @@
                     body: JSON.stringify({ 
                         action: 'updatePoin',
                         memberId: selectedMember.memberId, 
-                        poinDidapat: poinChange
+                        newTotalPoin: totalPoinBaru 
                     })
                 });
                 const updatePoinResult = await updatePoinRes.json();
@@ -852,7 +838,7 @@
                 selectedMember.totalPoin = updatePoinResult.newTotalPoin; 
 
             } catch (error) {
-                 alert('Error saat Update Poin. Cek Konsol F12: ' + error.message);
+                 alert('Error saat Update Poin (Langkah 1). Cek Konsol F12: ' + error.message + ' Pastikan URL Apps Script Member benar!');
                  submitBtn.textContent = originalText;
                  submitBtn.disabled = false;
                  return;
@@ -868,7 +854,7 @@
                 const addTrxResult = await addTrxRes.json();
                 
                 if (addTrxResult.status !== 'success') {
-                    throw new Error('Gagal menyimpan Transaksi. Cek Apps Script Transaksi. ' + (addTrxResult.message || ''));
+                    throw new Error('Gagal menyimpan Transaksi (Langkah 2). Cek Apps Script Transaksi. ' + (addTrxResult.message || ''));
                 }
 
                 alert(`✅ Transaksi ${transactionData.tipeTransaksi} Berhasil!\n\n` +
@@ -884,7 +870,7 @@
                 await loadMembers();
                 await loadTransactions();
             } catch (error) {
-                 alert('Error saat Simpan Transaksi. Poin member SUDAH terupdate, tapi transaksi GAGAL dicatat. Cek Konsol F12: ' + error.message);
+                 alert('Error saat Simpan Transaksi (Langkah 2). Poin member SUDAH terupdate, tapi transaksi GAGAL dicatat. Cek Konsol F12: ' + error.message + ' Pastikan URL Apps Script Transaksi benar!');
             }
             
             submitBtn.textContent = originalText;
@@ -908,6 +894,8 @@
                 transactionsData.reverse().forEach(trx => {
                     const poinVal = parseInt(trx.poinDidapat) || 0;
                     const totalHarga = parseInt(trx.totalHarga) || 0;
+                    const totalPoinSekarang = parseInt(trx.totalPoinSekarang) || 0; 
+
                     
                     const row = tbody.insertRow();
                     row.innerHTML = `
@@ -919,12 +907,13 @@
                         <td>${trx.jumlahItem || 0}</td>
                         <td>Rp ${totalHarga.toLocaleString('id-ID')}</td>
                         <td><strong style="color: ${poinVal >= 0 ? 'green' : 'red'};">${poinVal > 0 ? '+' : ''}${poinVal}</strong></td>
+                        <td>${totalPoinSekarang}</td>
                         <td>${trx.tipeTransaksi || '-'}</td>
                     `;
                 });
             } catch (error) {
-                console.error('Error loading transactions (Penting: cek CORS dan URL deployment):', error);
-                document.getElementById('transactionTableBody').innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Gagal memuat data transaksi. Cek Apps Script dan CORS.</td></tr>`;
+                console.error('Error loading transactions (Cek Apps Script Transaksi dan URL):', error);
+                document.getElementById('transactionTableBody').innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data transaksi. Cek Apps Script Transaksi dan URL.</td></tr>`;
             }
         }
 
