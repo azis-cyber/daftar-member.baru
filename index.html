@@ -57,9 +57,9 @@
         .member-dashboard-card h2 { font-size: 3em; margin: 10px 0; }
         .member-dashboard-card p { font-size: 1.2em; }
         
-        /* FIX MASALAH 2: JUDUL ADMIN TIDAK TERLIHAT */
+        /* FIX MASALAH 2: JUDUL ADMIN TERLIHAT */
         .admin-section h3 {
-            color: white; /* Jadikan warna judul putih agar terlihat di latar belakang ungu/biru */
+            color: white; 
             background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
             padding: 15px;
             border-radius: 10px;
@@ -80,7 +80,7 @@
         </div>
 
         <div id="main-nav-buttons" class="nav-buttons">
-            </div>
+        </div>
 
         <div id="home" class="page active">
             <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">Keuntungan Menjadi Member</h2>
@@ -354,7 +354,7 @@
     </div>
 
     <script>
-        // --- KONFIGURASI URL ANDA ---
+        // --- KONFIGURASI URL ANDA (PASTIKAN INI ADALAH URL DEPLOYMENT TERBARU ANDA) ---
         const MEMBER_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzwa_Tf1b5kqi3WHonPL8m0UBGxjCYDiOw6-nDS5an639X1QtmzV4vvuCeDwZ7ERdQX/exec';
         const TRANSACTION_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwClEfSUy_28FKeEuu9VXht-BK_R7syaMZVsl50Q-wNEl-z5ElGqN6NnVr_vmnY4935/exec';
 
@@ -378,8 +378,8 @@
             if (currentUser) {
                 if (currentUser.role === 'admin') {
                     showPage('admin-dashboard');
-                    loadMembers(); // Panggil di sini
-                    loadTransactions(); // Panggil di sini
+                    loadMembers(); 
+                    loadTransactions(); 
                 } else if (currentUser.role === 'member') {
                     showPage('member-dashboard');
                     loadMemberDashboard(currentUser.memberId);
@@ -426,7 +426,7 @@
             }
 
             try {
-                // Kirim identifier dan password ke Apps Script untuk diverifikasi
+                // Mengirim permintaan ke Apps Script dengan action: 'memberLogin'
                 const response = await fetch(MEMBER_SHEET_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -436,7 +436,8 @@
                         password: password 
                     })
                 });
-                const result = await response.json();
+                // Penting: Apps Script harus mengembalikan JSON dengan header CORS
+                const result = await response.json(); 
                 
                 if (result.status === 'success') {
                     currentUser = { role: 'member', memberId: result.memberId };
@@ -450,7 +451,7 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                alertElement.textContent = 'Terjadi kesalahan saat menghubungi server. Pastikan Deploy Apps Script sudah benar.';
+                alertElement.textContent = 'Terjadi kesalahan jaringan atau Apps Script. Cek konsol browser (F12) dan Deployment Apps Script.';
                 alertElement.classList.remove('hidden');
             }
         }
@@ -477,7 +478,6 @@
             localStorage.removeItem(AUTH_KEY);
             currentUser = null;
             checkSession();
-            // Clear all input fields on logout
             document.getElementById('member-login-identifier').value = '';
             document.getElementById('member-login-password').value = '';
             document.getElementById('admin-username').value = '';
@@ -496,7 +496,6 @@
             if(clickedBtn) clickedBtn.classList.add('active');
             
             if (pageId === 'admin-dashboard') {
-                // Pastikan admin section yang pertama aktif
                 showAdminSection('members'); 
             }
         }
@@ -509,19 +508,17 @@
             const sectionBtn = document.getElementById(`nav-btn-${section}`);
             if(sectionBtn) sectionBtn.classList.add('active');
 
-            // Panggil ulang data setiap kali pindah seksi
             if (section === 'members') loadMembers();
             if (section === 'transactions') loadTransactions();
             if (section === 'scan') {
-                // Reset form input transaksi
                 document.getElementById('transaction-container').classList.add('hidden'); 
                 stopScanner();
-                loadMemberSelect(); // FIX MASALAH 4: Pastikan select box terisi
+                loadMemberSelect(); 
             }
         }
         
         // --- REGISTER MEMBER ---
-        // FIX MASALAH 3: Pendaftaran (Tambahkan Password ke data form)
+        // FIX MASALAH 3: Pendaftaran (Form POST ke Apps Script)
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -535,7 +532,7 @@
                 memberId: memberId,
                 nama: document.getElementById('nama').value,
                 email: document.getElementById('email').value,
-                password: document.getElementById('member-password').value, // BARU: Tambahkan password
+                password: document.getElementById('member-password').value, // Mengirim password
                 telepon: document.getElementById('telepon').value,
                 alamat: document.getElementById('alamat').value,
                 kota: document.getElementById('kota').value,
@@ -546,7 +543,7 @@
             };
 
             try {
-                // Kirim data menggunakan Form POST ke Apps Script Member
+                // Menggunakan form submission untuk pendaftaran (ini lebih aman dari CORS untuk form)
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = MEMBER_SHEET_URL;
@@ -564,7 +561,8 @@
                 form.submit();
                 document.body.removeChild(form);
 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                // Tunggu sebentar untuk Apps Script memproses
+                await new Promise(resolve => setTimeout(resolve, 1500)); 
 
                 // Tampilkan Modal Sukses
                 document.getElementById('qrcode').innerHTML = '';
@@ -580,14 +578,14 @@
                 document.getElementById('registerForm').reset();
                 
             } catch (error) {
-                alert('Terjadi kesalahan saat pendaftaran: ' + error.message);
+                alert('Terjadi kesalahan saat pendaftaran. Cek konsol browser (F12): ' + error.message);
             }
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
         });
 
         // --- MEMBER DASHBOARD LOGIC ---
-        // FIX INDEX POIN: Poin sekarang di index 8
+        // Poin diambil dari index 8
         async function loadMemberDashboard(memberId) {
             await loadMembers(); 
             const member = membersData.find(m => m.memberId === memberId);
@@ -608,7 +606,7 @@
         }
 
         // --- ADMIN DASHBOARD LOGIC (MEMBER TABLE) ---
-        // FIX INDEX POIN: Poin sekarang di index 8
+        // Poin diambil dari index 8
         async function loadMembers() {
             try {
                 const response = await fetch(MEMBER_SHEET_URL);
@@ -633,7 +631,6 @@
                     (member.telepon && member.telepon.includes(search))
                 );
 
-
                 filteredMembers.forEach(member => {
                     const totalPoin = parseInt(member.totalPoin) || 0; 
                     const row = tbody.insertRow();
@@ -647,7 +644,7 @@
                     `;
                 });
             } catch (error) {
-                console.error('Error loading members:', error);
+                console.error('Error loading members (Penting: cek CORS dan URL deployment):', error);
                 document.getElementById('memberTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Gagal memuat data member. Cek Apps Script dan CORS.</td></tr>`;
             }
         }
@@ -656,9 +653,8 @@
 
         // --- ADMIN DASHBOARD LOGIC (TRANSACTION INPUT) ---
         
-        // FIX MASALAH 4: Pastikan select box terisi
+        // FIX MASALAH 4: MANUAL SELECT
         async function loadMemberSelect() {
-            // Pastikan data member sudah dimuat
             if (membersData.length === 0) {
                 await loadMembers();
             }
@@ -675,6 +671,7 @@
             document.getElementById('scanner-container').classList.add('hidden');
             document.getElementById('transaction-container').classList.add('hidden');
             stopScanner();
+            loadMemberSelect(); // Pastikan select box terisi
         }
 
         function selectMemberManual() {
@@ -687,13 +684,13 @@
             showTransactionForm(member);
         }
 
-        // QR Scanner
+        // QR Scanner (Logika tetap sama)
         function startScanner() {
+            // ... (Kode scanner)
             document.getElementById('scanner-container').classList.remove('hidden');
             document.getElementById('manual-select-container').classList.add('hidden');
             document.getElementById('transaction-container').classList.add('hidden');
 
-            // Panggil stop sebelum start, untuk berjaga-jaga
             if (html5QrCode && html5QrCode.isScanning) {
                  html5QrCode.stop().catch(err => console.error("Error stopping scanner before new start:", err));
             }
@@ -735,7 +732,8 @@
             selectedMember = member;
             document.getElementById('selectedMemberId').textContent = member.memberId;
             document.getElementById('selectedMemberName').textContent = member.nama;
-            document.getElementById('selectedMemberPoints').textContent = parseInt(member.totalPoin) || 0;
+            // Poin yang ditampilkan diambil dari data yang sudah di-load (index 8)
+            document.getElementById('selectedMemberPoints').textContent = parseInt(member.totalPoin) || 0; 
             document.getElementById('transaction-container').classList.remove('hidden');
             document.getElementById('manual-select-container').classList.add('hidden');
             document.getElementById('scanner-container').classList.add('hidden');
@@ -767,17 +765,16 @@
 
         async function submitTransaction() {
             if (!selectedMember) return;
-
             const transactionType = document.getElementById('transactionType').value;
-            // FIX INDEX POIN: Poin diambil dari properti object member, yang sudah benar
             const currentPoin = parseInt(selectedMember.totalPoin) || 0; 
             let poinChange = 0;
             let totalHarga = 0;
             let jumlahItem = 0;
             let produk = '';
-
-            // 1. Calculate Poin Change and Get Data
+            
+            // Logika perhitungan poin
             if (transactionType === 'PEMBELIAN_POIN') {
+                // ... (Perhitungan Poin Pembelian)
                 jumlahItem = parseInt(document.getElementById('jumlahItem').value) || 0;
                 totalHarga = parseInt(document.getElementById('totalHarga').value) || 0;
                 if (jumlahItem <= 0 || totalHarga <= 0 || isNaN(totalHarga)) { 
@@ -787,11 +784,13 @@
                 poinChange = jumlahItem * 5;
                 produk = 'Pembelian Martabak';
             } else if (transactionType === 'TUKAR_POIN') {
+                // ... (Perhitungan Poin Tukar)
                 poinChange = -250;
                 produk = 'Tukar Martabak Gratis (250 Poin)';
                 jumlahItem = 1;
-                totalHarga = 0; // Karena gratis
+                totalHarga = 0;
             } else if (transactionType === 'MANUAL_TAMBAH' || transactionType === 'MANUAL_KURANG') {
+                // ... (Perhitungan Poin Manual)
                 poinChange = parseInt(document.getElementById('manualPoinValue').value) || 0;
                 produk = (poinChange > 0) ? `Manual Tambah Poin` : `Manual Kurang Poin`;
                 jumlahItem = 1;
@@ -804,7 +803,7 @@
             
             const totalPoinBaru = currentPoin + poinChange;
 
-            // 2. Safety Checks
+            // Safety Checks
             if (totalPoinBaru < 0) {
                 alert(`Poin member (${currentPoin}) tidak cukup untuk operasi ini (${poinChange}). Transaksi dibatalkan.`);
                 return;
@@ -832,16 +831,15 @@
                 action: 'addTransaction' 
             };
             
-            // 3. Update Poin di Apps Script Member
+            // 1. Update Poin di Apps Script Member
             try {
-                // Gunakan poinDidapat, bukan totalPoinBaru, agar Apps Script menghitung sendiri
                 const updatePoinRes = await fetch(MEMBER_SHEET_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         action: 'updatePoin',
                         memberId: selectedMember.memberId, 
-                        poinDidapat: poinChange // Kirim perubahannya
+                        poinDidapat: poinChange
                     })
                 });
                 const updatePoinResult = await updatePoinRes.json();
@@ -850,17 +848,17 @@
                     throw new Error('Gagal update poin member. Cek Apps Script Member. ' + (updatePoinResult.message || ''));
                 }
                 
-                // Update poin di memori lokal agar tidak perlu reload semua
+                // Update poin di memori lokal 
                 selectedMember.totalPoin = updatePoinResult.newTotalPoin; 
 
             } catch (error) {
-                 alert('Error saat Update Poin: ' + error.message);
+                 alert('Error saat Update Poin. Cek Konsol F12: ' + error.message);
                  submitBtn.textContent = originalText;
                  submitBtn.disabled = false;
                  return;
             }
 
-            // 4. Kirim Data Transaksi ke Apps Script Transaksi
+            // 2. Kirim Data Transaksi ke Apps Script Transaksi
             try {
                 const addTrxRes = await fetch(TRANSACTION_SHEET_URL, {
                     method: 'POST',
@@ -886,7 +884,7 @@
                 await loadMembers();
                 await loadTransactions();
             } catch (error) {
-                 alert('Error saat Simpan Transaksi: ' + error.message + '. Poin member sudah terupdate. Cek Apps Script Transaksi.');
+                 alert('Error saat Simpan Transaksi. Poin member SUDAH terupdate, tapi transaksi GAGAL dicatat. Cek Konsol F12: ' + error.message);
             }
             
             submitBtn.textContent = originalText;
@@ -901,13 +899,12 @@
 
                 if (transactionsData.error) throw new Error(transactionsData.error);
 
-
                 document.getElementById('totalTransactions').textContent = transactionsData.length;
 
                 const tbody = document.getElementById('transactionTableBody');
                 tbody.innerHTML = '';
 
-                // Reverse untuk menampilkan transaksi terbaru di atas
+                // Tampilkan transaksi terbaru di atas
                 transactionsData.reverse().forEach(trx => {
                     const poinVal = parseInt(trx.poinDidapat) || 0;
                     const totalHarga = parseInt(trx.totalHarga) || 0;
@@ -926,7 +923,7 @@
                     `;
                 });
             } catch (error) {
-                console.error('Error loading transactions:', error);
+                console.error('Error loading transactions (Penting: cek CORS dan URL deployment):', error);
                 document.getElementById('transactionTableBody').innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Gagal memuat data transaksi. Cek Apps Script dan CORS.</td></tr>`;
             }
         }
@@ -945,6 +942,11 @@
         function closeModal() {
             document.getElementById('successModal').classList.remove('active');
             showPage('member-login');
+        }
+
+        // Inisialisasi
+        window.onload = function() {
+            checkSession();
         }
     </script>
 </body>
