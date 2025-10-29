@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Martabak Loyalty & Inventory System - Profesional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root {--primary-color: #A0522D; --accent-color: #FFD700; --background-color: #121212; --text-color: #E0E0E0; --card-background: #1e1e1e; --shadow-color: rgba(0, 0, 0, 0.5); --sidebar-width: 250px;}
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); display: flex; min-height: 100vh;}
+        .sidebar {width: var(--sidebar-width); background-color: var(--card-background); padding: 20px; box-shadow: 2px 0 10px var(--shadow-color); position: fixed; height: 100%; z-index: 100;}
+        .content-area {margin-left: var(--sidebar-width); flex-grow: 1; padding: 30px;}
+        #menu-toggle-btn {position: fixed; top: 20px; left: 20px; z-index: 110; background-color: var(--primary-color); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; display: none;} /* Sembunyikan toggle untuk desktop */
+        .logo h1 {color: var(--accent-color); font-size: 1.5rem; margin-bottom: 30px; text-align: center; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px;}
+        .nav-link {display: block; color: var(--text-color); text-decoration: none; padding: 15px 10px; margin-bottom: 5px; border-radius: 8px; transition: background-color 0.3s; font-weight: 600;}
+        .nav-link:hover, .nav-link.active {background-color: var(--primary-color); color: #FFF;}
+        .nav-link i {margin-right: 10px;}
+        .page-section {max-width: 900px; margin: 0 auto 50px;}
+        h2 {color: var(--primary-color); border-bottom: 3px solid var(--accent-color); padding-bottom: 10px; margin-bottom: 30px; font-weight: 700;}
+        .form-card, .stats-card, .member-card {background-color: var(--card-background); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px var(--shadow-color); margin-top: 20px; border-left: 5px solid var(--primary-color);}
+        input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="number"], select {width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #333; border-radius: 8px; background-color: #2c2c2c; color: var(--text-color); font-size: 1rem; transition: border-color 0.3s;}
+        .btn {padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background-color 0.3s;}
+        .primary-btn {background-color: var(--primary-color); color: #FFF;}
+        .secondary-btn {background-color: #555; color: #FFF; margin-left: 10px;}
+        .hidden {display: none !important;}
+        .grid-layout {display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;}
+        .notification-area {position: fixed; top: 20px; right: 20px; z-index: 1000;}
+        .notification {background-color: #2e7d32; color: white; padding: 15px 25px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);}
+        .notification.error {background-color: #c62828;}
+        .data-table {width: 100%; border-collapse: collapse; margin-top: 20px;}
+        .data-table th, .data-table td {border: 1px solid #333; padding: 10px; text-align: left;}
+        .data-table th {background-color: var(--primary-color); color: white;}
+        #qr-canvas-wrapper {position: relative; display: inline-block;}
+        #qr-logo {position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; border-radius: 8px; z-index: 10; padding: 5px; display: none;}
+        #qr-reader video {width: 100% !important; height: auto !important; max-height: 250px;}
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo"><h1>MARTABAK 👑</h1></div>
+        <nav class="nav-menu">
+            <a href="#home" class="nav-link active"><i class="fas fa-home"></i> Beranda</a>
+            <a href="#about" class="nav-link"><i class="fas fa-info-circle"></i> Tentang Kami</a>
+            <a href="#register" class="nav-link nav-link-public"><i class="fas fa-user-plus"></i> Daftar Member</a>
+            <a href="#login" class="nav-link nav-link-public"><i class="fas fa-sign-in-alt"></i> Login</a>
+            
+            <hr style="margin: 15px 0; border-color: #333;" class="hidden" id="nav-separator">
+
+            <a href="#member-dashboard" class="nav-link nav-link-member hidden"><i class="fas fa-tachometer-alt"></i> Dashboard Saya</a>
+            <a href="#admin-dashboard" class="nav-link nav-link-admin hidden"><i class="fas fa-user-shield"></i> Panel Admin</a>
+            <a href="#" id="logout-btn" class="nav-link hidden"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </nav>
+    </aside>
+
+    <main class="content-area" id="content-area">
+        <section id="home" class="page-section"><h2>Selamat Datang</h2><p class="tagline">Website Loyalty dan Inventaris Martabak Anda.</p></section>
+        <section id="about" class="page-section hidden"><h2>Tentang Kami</h2><p>Kami adalah bisnis martabak yang berkomitmen pada kualitas dan loyalitas pelanggan. Sistem ini membantu kami mengelola poin dan inventaris bahan baku secara efisien dan aman.</p></section>
+        
+        <section id="register" class="page-section hidden"><h2>Daftar Member Baru</h2><form id="register-form" class="form-card"><input type="text" id="reg-name" placeholder="Nama Lengkap" required><input type="email" id="reg-email" placeholder="Email" required><input type="tel" id="reg-phone" placeholder="Nomor Telepon" required><input type="password" id="reg-password" placeholder="Kata Sandi (Minimal 6 karakter)" required><button type="submit" class="btn primary-btn">Daftar</button></form></section>
+        
+        <section id="login" class="page-section hidden"><h2>Login Member / Admin</h2><form id="login-form" class="form-card"><input type="email" id="log-email" placeholder="Email (Member atau Admin)" required><input type="password" id="log-password" placeholder="Kata Sandi" required><button type="submit" class="btn primary-btn">Login</button><p style="margin-top: 15px; font-size: 0.8rem;">**Admin harus menggunakan email yang telah disetup dengan Custom Claim (FASE 1).</p></form></section>
+        
+        <section id="member-dashboard" class="page-section hidden"><h2>Dashboard Member</h2></section>
+        
+        <section id="admin-dashboard" class="page-section hidden"><h2>Panel Kontrol Admin</h2></section>
+        
+        <div id="notification-area" class="notification-area"></div>
+    </main>
+    
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <script type="module">
+        // =======================================================================
+        // 🔥 FIREBASE SDK IMPORTS
+        // =======================================================================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+        // =======================================================================
+        // 🔑 KONFIGURASI API FIREBASE (GANTI DENGAN MILIK ANDA)
+        // =======================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyByRFk9-JixwKt1JGUJvIBS-_74GFepbSU",
+            authDomain: "pendaftaran-martabak-572e0.firebaseapp.com",
+            projectId: "pendaftaran-martabak-572e0",
+            storageBucket: "pendaftaran-martabak-572e0.firebasestorage.app",
+            messagingSenderId: "332536708892",
+            appId: "1:332536708892:web:2622ec175c8d9df9e504d9",
+            measurementId: "G-1L29VY75YC"
+        };
+
+        // =======================================================================
+        // INISIALISASI & UTILITAS
+        // =======================================================================
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        setPersistence(auth, browserLocalPersistence); // Agar sesi login tetap ada
+        let qrCodeScanner = null;
+
+        function showNotification(message, isError = false) { 
+            const notifArea = document.getElementById('notification-area');
+            const notif = document.createElement('div');
+            notif.className = `notification ${isError ? 'error' : ''}`;
+            notif.textContent = message;
+            notifArea.appendChild(notif);
+            setTimeout(() => { notif.remove(); }, 5000);
+        }
+
+        function navigate(targetId) { 
+            if (qrCodeScanner && qrCodeScanner.isScanning) { 
+                qrCodeScanner.stop().catch(() => {});
+            }
+            document.querySelectorAll('.page-section').forEach(section => { section.classList.add('hidden'); });
+            document.getElementById(targetId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + targetId) { link.classList.add('active'); }
+            });
+        }
+        
+        function updateNavigation(isLoggedIn, role) {
+            const isPublic = document.querySelectorAll('.nav-link-public');
+            const navMember = document.querySelector('.nav-link-member');
+            const navAdmin = document.querySelector('.nav-link-admin');
+            const logoutBtn = document.getElementById('logout-btn');
+            const separator = document.getElementById('nav-separator');
+
+            isPublic.forEach(link => link.classList.toggle('hidden', isLoggedIn));
+            logoutBtn.classList.toggle('hidden', !isLoggedIn);
+            navMember.classList.toggle('hidden', !(isLoggedIn && role === 'member'));
+            navAdmin.classList.toggle('hidden', !(isLoggedIn && role === 'admin'));
+            separator.classList.toggle('hidden', !isLoggedIn);
+        }
+        
+        function formatNumberPrecision(num) {
+            return parseFloat(num.toFixed(2));
+        }
+
+        // =======================================================================
+        // AUTH STATE LISTENER (Pengecekan Role Admin Aman)
+        // =======================================================================
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const tokenResult = await user.getIdTokenResult(true); // Memaksa refresh token untuk cek Custom Claim
+                const role = tokenResult.claims.admin ? 'admin' : 'member';
+                
+                const userDocRef = doc(db, 'members', user.uid);
+                const docSnap = await getDoc(userDocRef);
+
+                if (docSnap.exists() || role === 'admin') { // Admin tidak wajib ada di koleksi members
+                    const userData = docSnap.exists() ? docSnap.data() : { points: 0, name: 'Admin', role: 'admin' };
+                    updateNavigation(true, role);
+                    
+                    if (role === 'admin') {
+                        navigate('admin-dashboard'); 
+                        loadAdminDashboard(user.uid);
+                    } else {
+                        navigate('member-dashboard'); 
+                        loadMemberDashboard(user.uid, userData);
+                    }
+                } else {
+                    await signOut(auth);
+                }
+            } else {
+                updateNavigation(false, null);
+                navigate('home');
+            }
+        });
+
+        // =======================================================================
+        // REGISTRASI, LOGIN, LOGOUT HANDLERS
+        // =======================================================================
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                // Simpan data member ke Firestore (Akan melewati Security Rules CREATE)
+                await setDoc(doc(db, 'members', userCredential.user.uid), {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    points: 0,
+                    role: 'member',
+                    createdAt: serverTimestamp()
+                });
+
+                showNotification("Pendaftaran berhasil! Silakan Login.");
+                document.getElementById('register-form').reset();
+                navigate('login');
+            } catch (error) {
+                showNotification(`Pendaftaran Gagal: ${error.message}`, true);
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('log-email').value;
+            const password = document.getElementById('log-password').value;
+
+            try {
+                // Login ini berlaku untuk member atau admin
+                await signInWithEmailAndPassword(auth, email, password);
+                showNotification("Login Berhasil! Mengarahkan ke Dashboard...");
+            } catch (error) {
+                showNotification(`Login Gagal: ${error.message}`, true);
+            }
+        });
+        
+        document.getElementById('logout-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                if (qrCodeScanner && qrCodeScanner.isScanning) { await qrCodeScanner.stop(); }
+                await signOut(auth);
+                showNotification("Anda telah logout.");
+                navigate('home');
+            } catch(error) {
+                showNotification(`Gagal Logout: ${error.message}`, true);
+            }
+        });
+
+        // =======================================================================
+        // A. FUNGSI DASHBOARD MEMBER (POIN, QR CODE, RIWAYAT)
+        // =======================================================================
+        function drawLogoOnQRCode(canvas) {
+            const ctx = canvas.getContext('2d');
+            const qrSize = canvas.width;
+            const logoSize = 40; 
+            const logoX = (qrSize - logoSize) / 2;
+            const logoY = (qrSize - logoSize) / 2;
+            const padding = 5;
+            
+            // Gambar kotak putih untuk memberi ruang pada logo
+            ctx.fillStyle = '#ffffff'; 
+            ctx.fillRect(logoX - padding, logoY - padding, logoSize + 2 * padding, logoSize + 2 * padding);
+            
+            document.getElementById('qr-logo').style.display = 'block'; 
+        }
+
+        async function loadMemberDashboard(uid, userData) {
+            const dashboard = document.getElementById('member-dashboard');
+            
+            // Ambil Riwayat Poin dan Penukaran
+            const qPoints = query(collection(db, 'point_transactions'), where('memberId', '==', uid), orderBy('timestamp', 'desc'), limit(10));
+            const pointSnap = await getDocs(qPoints);
+            const qRedeem = query(collection(db, 'redeem_requests'), where('memberId', '==', uid), orderBy('timestamp', 'desc'), limit(10));
+            const redeemSnap = await getDocs(qRedeem);
+
+            let pointsHistoryHtml = pointSnap.docs.map(doc => {
+                const data = doc.data();
+                const statusColor = data.type === 'ADD' ? 'green' : 'red';
+                const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString('id-ID') : 'N/A';
+                return `<tr><td>${date}</td><td>${data.description}</td><td style="color:${statusColor}; font-weight:bold;">${data.points_change > 0 ? '+' : ''}${data.points_change}</td><td>${data.new_points_balance}</td></tr>`;
+            }).join('');
+            
+            let redeemHistoryHtml = redeemSnap.docs.map(doc => {
+                const data = doc.data();
+                const statusColor = data.status === 'approved' ? 'green' : (data.status === 'rejected' ? 'red' : 'orange');
+                const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString('id-ID') : 'N/A';
+                return `<tr><td>${date}</td><td>${data.item}</td><td style="color:${statusColor}; font-weight:bold;">${data.status.toUpperCase()}</td></tr>`;
+            }).join('');
+
+            // HTML Dashboard Member
+            dashboard.innerHTML = `
+                <h2>Dashboard Member</h2>
+                
+                <div class="grid-layout">
+                    <div class="member-card">
+                        <h3>Poin Saat Ini: <span style="color: var(--accent-color);">${userData.points}</span></h3>
+                        <p>Total Poin yang telah Anda kumpulkan.</p>
+                        <hr style="margin: 15px 0; border-color: #333;">
+                        <button class="btn primary-btn" id="request-redeem-btn">Minta Penukaran Poin (300 Poin)</button>
+                    </div>
+                    
+                    <div class="member-card" style="text-align: center;">
+                        <h3>QR Code Member</h3>
+                        <p>ID Unik Anda: ${uid.substring(0, 8)}...</p>
+                        <div id="qr-canvas-wrapper" style="margin-top: 20px;">
+                            <div id="member-qr-code"></div>
+                            <i id="qr-logo" class="fas fa-crown" style="color: var(--primary-color); font-size: 20px;"></i>
+                        </div>
+                        <button class="btn secondary-btn" id="download-qr-btn" style="margin-top: 15px;">Unduh QR Code</button>
+                    </div>
+                </div>
+
+                <div class="member-card"><h3>Riwayat Penambahan/Pengurangan Poin (10 Terbaru)</h3><table class="data-table"><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Perubahan</th><th>Saldo Baru</th></tr></thead><tbody>${pointsHistoryHtml || '<tr><td colspan="4">Belum ada riwayat poin.</td></tr>'}</tbody></table></div>
+                <div class="member-card"><h3>Riwayat Permintaan Penukaran</h3><table class="data-table"><thead><tr><th>Tanggal</th><th>Item Ditukar</th><th>Status</th></tr></thead><tbody>${redeemHistoryHtml || '<tr><td colspan="3">Belum ada permintaan penukaran poin.</td></tr>'}</tbody></table></div>
+            `;
+            
+            // Inisialisasi QR Code
+            const qrContainer = document.getElementById("member-qr-code");
+            qrContainer.innerHTML = ''; 
+            new QRCode(qrContainer, { text: uid, width: 150, height: 150, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+            setTimeout(() => {
+                const canvas = qrContainer.querySelector('canvas');
+                if (canvas) {
+                    drawLogoOnQRCode(canvas);
+                    document.getElementById('download-qr-btn').onclick = () => {
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.drawImage(canvas, 0, 0);
+                        
+                        // Gambar Logo di Canvas Unduhan
+                        const logoSize = 40; const logoX = (tempCanvas.width - logoSize) / 2; const logoY = (tempCanvas.height - logoSize) / 2;
+                        tempCtx.fillStyle = '#ffffff'; tempCtx.fillRect(logoX, logoY, logoSize, logoSize);
+                        tempCtx.font = '24px "Font Awesome 6 Free"'; tempCtx.fontWeight = '900';
+                        tempCtx.fillStyle = '#A0522D'; tempCtx.textAlign = 'center'; tempCtx.textBaseline = 'middle';
+                        tempCtx.fillText('\uf521', tempCanvas.width / 2, tempCanvas.height / 2);
+                        
+                        const a = document.createElement('a'); a.href = tempCanvas.toDataURL('image/png');
+                        a.download = `QR_Member_${uid}.png`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    };
+                }
+            }, 50);
+
+            // Handler Permintaan Penukaran Poin
+            document.getElementById('request-redeem-btn').addEventListener('click', async () => {
+                if (userData.points < 300) { showNotification("Poin Anda tidak mencukupi (Min. 300).", true); return; }
+                const item = prompt("Masukkan nama item yang ingin ditukar (misal: 1 Martabak Gratis):");
+                if (item) {
+                    try {
+                        await addDoc(collection(db, 'redeem_requests'), { memberId: uid, item: item, points_deducted: 300, status: 'pending', timestamp: serverTimestamp() });
+                        showNotification("Permintaan penukaran poin berhasil dikirim! Menunggu persetujuan admin.");
+                    } catch (error) { showNotification(`Gagal mengirim permintaan: ${error.message}`, true); }
+                }
+            });
+        }
+        
+        // =======================================================================
+        // B. FUNGSI DASHBOARD ADMIN (SCAN, MEMBER, REDEEM, INVENTORY)
+        // =======================================================================
+        
+        // --- Fitur 1 & 2: SCAN QR Code dan Pencarian Member, Daftar Member
+        async function searchAndDisplayMember(memberId) {
+            const resultArea = document.getElementById('member-search-result');
+            const memberDocRef = doc(db, 'members', memberId);
+            try {
+                const docSnap = await getDoc(memberDocRef);
+                if(docSnap.exists()) {
+                    const data = docSnap.data();
+                    resultArea.classList.remove('hidden');
+                    resultArea.innerHTML = `
+                        <h3>Member Ditemukan: ${data.name}</h3>
+                        <p>Email: ${data.email}</p>
+                        <p>Poin Saat Ini: <strong>${data.points}</strong></p>
+                        
+                        <h4 style="margin-top: 15px;">Aksi Cepat Poin</h4>
+                        <button class="btn primary-btn" id="add-points-btn" data-id="${memberId}" data-points="${data.points}">+ Tambah 5 Poin (Beli)</button>
+                        <button class="btn secondary-btn" id="manual-redeem-btn" data-id="${memberId}" data-points="${data.points}">- Kurangi Poin Manual</button>
+                    `;
+                    
+                    // Handler Tambah Poin
+                    document.getElementById('add-points-btn').addEventListener('click', async (e) => {
+                        const currentPoints = parseInt(e.target.dataset.points);
+                        const newPoints = currentPoints + 5;
+                        await updateDoc(memberDocRef, { points: newPoints });
+                        await addDoc(collection(db, 'point_transactions'), { memberId: memberId, adminId: auth.currentUser.uid, type: 'ADD', points_change: 5, new_points_balance: newPoints, description: 'Pembelian Martabak', timestamp: serverTimestamp() });
+                        showNotification(`Poin ${data.name} diupdate: +5. Saldo: ${newPoints}.`);
+                        searchAndDisplayMember(memberId); 
+                        loadMemberList();
+                    });
+                    
+                    // Handler Kurangi Poin Manual
+                    document.getElementById('manual-redeem-btn').addEventListener('click', async (e) => {
+                        const amount = prompt("Masukkan jumlah poin yang akan DIKURANGI:");
+                        const amountInt = parseInt(amount);
+                        if (amountInt > 0) {
+                            const currentPoints = parseInt(e.target.dataset.points);
+                            const newPoints = currentPoints - amountInt;
+                            if (newPoints < 0) {
+                                showNotification("Poin tidak cukup untuk pengurangan ini.", true);
+                                return;
+                            }
+                            await updateDoc(memberDocRef, { points: newPoints });
+                            await addDoc(collection(db, 'point_transactions'), { memberId: memberId, adminId: auth.currentUser.uid, type: 'REDEEM', points_change: -amountInt, new_points_balance: newPoints, description: 'Pengurangan Poin Manual', timestamp: serverTimestamp() });
+                            showNotification(`Poin ${data.name} diupdate: -${amountInt}. Saldo: ${newPoints}.`);
+                            searchAndDisplayMember(memberId); 
+                            loadMemberList();
+                        }
+                    });
+                    
+                } else { resultArea.classList.add('hidden'); showNotification("Member tidak ditemukan.", true); }
+            } catch(error) { showNotification(`Error saat mencari: ${error.message}`, true); }
+        }
+
+        async function loadMemberList() {
+            const table = document.getElementById('member-list-table');
+            const q = query(collection(db, 'members'), orderBy('points', 'desc')); 
+            const snap = await getDocs(q);
+            
+            let html = `<thead><tr><th>Peringkat</th><th>Nama Member</th><th>Email</th><th>Poin</th><th>Status</th></tr></thead><tbody>`;
+            let rank = 1;
+            snap.forEach(doc => {
+                const data = doc.data();
+                html += `<tr><td>#${rank++}</td><td>${data.name}</td><td>${data.email}</td><td>${data.points}</td><td>${rank - 1 === 1 ? '👑 Paling Aktif' : ''}</td></tr>`;
+            });
+            table.innerHTML = html + `</tbody>`;
+        }
+
+        const stopScanHandler = async () => { /* ... Logika Stop Scan ... */ };
+        const startScanHandler = () => { /* ... Logika Start Scan ... */ };
+        const searchIdHandler = () => { /* ... Logika Search ID ... */ };
+
+
+        // --- Fitur 3: Permintaan Penukaran Poin & Riwayat
+        async function loadRedeemRequests() { /* ... Logika Load Redeem Requests ... */ }
+        async function redeemActionHandler(e) { /* ... Logika Setujui/Tolak Redeem ... */ }
+
+
+        // --- Fitur 5: Pengelola Inventaris (Sangat Detail)
+        async function loadInventoryData() {
+            const listTable = document.getElementById('inventory-list-table');
+            const historyTable = document.getElementById('usage-history-table');
+            const selectElement = document.getElementById('usage-item-select');
+            
+            // 1. Load Stok Inventaris
+            const qInv = query(collection(db, 'inventory'), orderBy('name', 'asc'));
+            const invSnap = await getDocs(qInv);
+            
+            let listHtml = `<thead><tr><th>Nama Barang</th><th>Stok (Angka Penting)</th><th>Satuan</th></tr></thead><tbody>`;
+            let selectOptions = '<option value="" disabled selected>Pilih Barang...</option>';
+            invSnap.forEach(doc => {
+                const data = doc.data();
+                const formattedQty = formatNumberPrecision(data.quantity); // Angka penting
+                listHtml += `<tr><td>${data.name}</td><td>${formattedQty}</td><td>${data.unit}</td></tr>`;
+                selectOptions += `<option value="${doc.id}" data-unit="${data.unit}">${data.name} (${formattedQty} ${data.unit})</option>`;
+            });
+            listTable.innerHTML = listHtml + `</tbody>`;
+            selectElement.innerHTML = selectOptions;
+
+            // 2. Load Riwayat Penggunaan (10 Terbaru)
+            const qUsage = query(collection(db, 'usage_history'), orderBy('timestamp', 'desc'), limit(10));
+            const usageSnap = await getDocs(qUsage);
+            
+            let historyHtml = `<thead><tr><th>Tanggal</th><th>Barang</th><th>Jumlah Digunakan</th><th>Satuan</th></tr></thead><tbody>`;
+            usageSnap.forEach(doc => {
+                const data = doc.data();
+                const formattedAmount = formatNumberPrecision(data.amountUsed);
+                const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString('id-ID') : 'N/A';
+                historyHtml += `<tr><td>${date}</td><td>${data.itemName}</td><td>${formattedAmount}</td><td>${data.unit}</td></tr>`;
+            });
+            historyTable.innerHTML = historyHtml + `</tbody>`;
+        }
+
+        async function inventoryFormHandler(e) {
+            e.preventDefault();
+            const name = document.getElementById('inv-name').value;
+            const quantity = parseFloat(document.getElementById('inv-qty').value);
+            const unit = document.getElementById('inv-unit').value;
+
+            if (isNaN(quantity) || quantity <= 0) { showNotification("Jumlah harus berupa angka positif.", true); return; }
+            
+            try {
+                const invRef = collection(db, 'inventory');
+                const q = query(invRef, where('name', '==', name));
+                const snap = await getDocs(q);
+
+                if (!snap.empty) {
+                    // UPDATE: Tambah Stok
+                    const docToUpdate = snap.docs[0];
+                    const currentQty = docToUpdate.data().quantity;
+                    const newQty = formatNumberPrecision(currentQty + quantity);
+                    
+                    await updateDoc(doc(db, 'inventory', docToUpdate.id), { quantity: newQty, unit: unit });
+                    showNotification(`Stok ${name} berhasil diupdate. Stok baru: ${newQty} ${unit}`);
+                } else {
+                    // CREATE: Barang Baru
+                    await addDoc(invRef, { name: name, quantity: formatNumberPrecision(quantity), unit: unit, createdAt: serverTimestamp() });
+                    showNotification(`Barang ${name} berhasil ditambahkan.`);
+                }
+                document.getElementById('inventory-form').reset();
+                loadInventoryData();
+            } catch (error) { showNotification(`Gagal menyimpan inventaris: ${error.message}`, true); }
+        }
+
+        async function usageFormHandler(e) {
+            e.preventDefault();
+            const itemId = document.getElementById('usage-item-select').value;
+            const amountUsed = parseFloat(document.getElementById('usage-amount').value);
+            const selectElement = document.getElementById('usage-item-select');
+            const itemName = selectElement.options[selectElement.selectedIndex].textContent.split('(')[0].trim();
+            const itemUnit = selectElement.options[selectElement.selectedIndex].dataset.unit;
+
+            if (!itemId || isNaN(amountUsed) || amountUsed <= 0) { showNotification("Pilih barang dan masukkan jumlah yang valid.", true); return; }
+
+            try {
+                const itemDocRef = doc(db, 'inventory', itemId);
+                const itemSnap = await getDoc(itemDocRef);
+                const currentQty = itemSnap.data().quantity;
+                
+                if (currentQty < amountUsed) { showNotification(`Stok ${itemName} tidak cukup. Stok saat ini: ${formatNumberPrecision(currentQty)} ${itemUnit}`, true); return; }
+                
+                // 1. Kurangi Stok
+                const newQty = formatNumberPrecision(currentQty - amountUsed);
+                await updateDoc(itemDocRef, { quantity: newQty });
+
+                // 2. Catat Riwayat Penggunaan
+                await addDoc(collection(db, 'usage_history'), {
+                    itemId: itemId, itemName: itemName, amountUsed: formatNumberPrecision(amountUsed), unit: itemUnit, timestamp: serverTimestamp()
+                });
+
+                showNotification(`Penggunaan ${formatNumberPrecision(amountUsed)} ${itemUnit} ${itemName} berhasil dicatat.`);
+                document.getElementById('usage-form').reset();
+                loadInventoryData();
+            } catch (error) { showNotification(`Gagal mencatat penggunaan: ${error.message}`, true); }
+        }
+
+        // FUNGSI ADMIN DASHBOARD UTAMA
+        async function loadAdminDashboard(adminUid) {
+            const dashboard = document.getElementById('admin-dashboard');
+            dashboard.innerHTML = `
+                <h2>Panel Kontrol Admin</h2>
+                <div class="grid-layout">
+                    <div class="member-card" id="admin-scan-card">
+                        <h3>1. Scan QR Code & Pencarian Member</h3>
+                        <button class="btn primary-btn" id="start-scan-btn"><i class="fas fa-qrcode"></i> Mulai Scan QR</button>
+                        <button class="btn secondary-btn hidden" id="stop-scan-btn"><i class="fas fa-times-circle"></i> Tutup Scan</button>
+                        <div id="qr-reader" style="width: 100%; margin-top: 15px; display: none;"></div>
+                        <input type="text" id="member-id-input" placeholder="Masukkan ID Member Manual" style="margin-top: 15px;">
+                        <button class="btn primary-btn" id="search-id-btn">Cari ID</button>
+                    </div>
+                    <div id="member-search-result" class="member-card hidden" style="border-left-color: var(--accent-color);"></div>
+                </div>
+
+                <div class="member-card"><h3>2. Daftar Seluruh Member & Paling Aktif</h3><table class="data-table" id="member-list-table"></table></div>
+                <div class="member-card"><h3>3. Daftar Permintaan Penukaran Poin & Riwayat</h3><p>Tertunda dan Riwayat Penukaran Terakhir.</p><table class="data-table" id="redeem-requests-table"></table></div>
+                
+                <div class="member-card" id="inventory-manager-card">
+                    <h3>4. Pengelola Inventaris (Bahan Baku)</h3>
+                    <h4>Tambah / Update Stok Barang</h4>
+                    <form id="inventory-form"><input type="text" id="inv-name" placeholder="Nama Barang (misal: Tepung Terigu)" required><input type="number" id="inv-qty" placeholder="Jumlah/Massa (Contoh: 1.5)" step="0.01" required><input type="text" id="inv-unit" placeholder="Satuan (misal: kg, g, liter)" required><button type="submit" class="btn primary-btn">Tambah / Update Stok</button></form>
+                    <hr style="margin: 20px 0; border-color: #333;">
+                    <h4>Catat Penggunaan Barang (Pengurangan Stok)</h4>
+                    <form id="usage-form"><select id="usage-item-select" required></select><input type="number" id="usage-amount" placeholder="Jumlah Digunakan (misal: 0.5)" step="0.01" required><button type="submit" class="btn secondary-btn">Catat Penggunaan</button></form>
+                    <hr style="margin: 20px 0; border-color: #333;">
+                    <h4>Stok Saat Ini</h4><table class="data-table" id="inventory-list-table"></table>
+                    <h4>Riwayat Penggunaan (10 Terbaru)</h4><table class="data-table" id="usage-history-table"></table>
+                </div>
+            `;
+            
+            // Inisialisasi Handler
+            if (!qrCodeScanner) { qrCodeScanner = new Html5Qrcode("qr-reader"); }
+            document.getElementById('start-scan-btn').addEventListener('click', startScanHandler);
+            document.getElementById('stop-scan-btn').addEventListener('click', stopScanHandler);
+            document.getElementById('search-id-btn').addEventListener('click', searchIdHandler);
+            document.getElementById('inventory-form').addEventListener('submit', inventoryFormHandler);
+            document.getElementById('usage-form').addEventListener('submit', usageFormHandler);
+
+            // Load Semua Data Awal
+            loadMemberList();
+            loadRedeemRequests();
+            loadInventoryData();
+        }
+        
+    </script>
+</body>
+</html>

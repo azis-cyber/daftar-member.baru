@@ -1,0 +1,5 @@
+# File dan Folder Rahasia (WAJIB DIABAIKAN)
+setup-admin/
+serviceAccountKey.json
+.DS_Store
+node_modules/
